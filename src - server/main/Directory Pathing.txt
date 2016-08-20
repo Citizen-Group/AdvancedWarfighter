@@ -1,0 +1,11 @@
+Type 			- SRC
+Major grouping 		- Main
+Language 		- Java
+Country Code 		- CA
+Company			- CIG
+Sub Company/Department 	- Softworks
+Project Group
+Project
+Section
+-> Files
+-> Files
