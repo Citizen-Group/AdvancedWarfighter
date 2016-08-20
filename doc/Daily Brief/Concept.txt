@@ -1,0 +1,14 @@
+A daily email summarizing news of the previous day, as well overnight news delivered before 7am. Curating the major news.
+This ties in to local news alerts, which will appear during the day. This summary will showcase news that wouldn’t be covered well by local media or even national news. 
+Provides an advertising outlet for small businesses, store launches 
+
+Scope: 
+Local, City, Province, International
+
+Sections:
+Lulz, Stats, Non Emotional Content
+
+(+) Add-ons
+Markets
+-	US
+-	CAN
