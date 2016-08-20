@@ -1,0 +1,18 @@
+body {
+	margin-top: 50px;
+	margin-bottom: 50px;
+	background: none;
+    color: white;
+}
+
+h1 {
+ color:floralwhite;
+}
+
+.full {
+  background: url(/img/WF-bg-splash.jpg) no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
