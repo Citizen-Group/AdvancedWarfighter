@@ -1,6 +1,8 @@
+Directory folder structure for enterprise Canadian projects
+
 Type 			- SRC
 Major grouping 		- Main
-Language 		- Java
+Language 		- JavaScript 
 Country Code 		- CA
 Company			- CIG
 Sub Company/Department 	- Softworks
