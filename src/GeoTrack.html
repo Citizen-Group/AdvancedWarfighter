@@ -1,0 +1,697 @@
+<!doctype html>
+<html>
+<head>
+    <title>Map Examples</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="ol.css" type="text/css" />
+
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+            integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+            crossorigin="anonymous"></script>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <style>
+        .row-bordered {
+            border: 1px solid #ccc;
+            margin: 0px -15px 5px 5px;
+            border-radius: 2px;
+        }
+    </style>
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <link href="http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+
+    <!-- Draw Code -->
+    <style>
+        .tooltip {
+            position: relative;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            color: white;
+            padding: 4px 8px;
+            opacity: 0.7;
+            white-space: nowrap;
+        }
+        .tooltip-measure {
+            opacity: 1;
+            font-weight: bold;
+        }
+        .tooltip-static {
+            background-color: #ffcc33;
+            color: black;
+            border: 1px solid white;
+        }
+        .tooltip-measure:before,
+        .tooltip-static:before {
+            border-top: 6px solid rgba(0, 0, 0, 0.5);
+            border-right: 6px solid transparent;
+            border-left: 6px solid transparent;
+            content: "";
+            position: absolute;
+            bottom: -6px;
+            margin-left: -7px;
+            left: 50%;
+        }
+        .tooltip-static:before {
+            border-top-color: #ffcc33;
+        }    </style>
+
+    <!-- AI -->
+    <script src="synaptic.js"></script>
+    <script src="creature.js"></script>
+    <script src="world.js"></script>
+
+</head>
+
+<body>
+<!-- Header -->
+<div class="container">
+    <div class="col-xs-12">
+        <div class="row row-bordered">
+            <div class="col-xs-3">Lon: <span id="vlon"></span></div>
+            <div class="col-xs-3">Lat: <span id="vlat"></span></div>
+            <div class="col-xs-3">Angle: <span id="vrot"></span></div>
+            <div class="col-xs-3">Level: <span id="vzom"></span></div>
+        </div>
+    </div>
+    <!-- Mapping Code -->
+    <div class="col-xs-9">
+        <div class="row">
+            <div id="map" class="full-map"></div>
+            <div id="location" class="marker"><span class="icon-arrow-up"></span></div>
+        </div>
+        <!-- Footer of Map Code -->
+        <div class="row" id="selDisEl-label">
+            Console:
+        </div>
+        <div class="row row-bordered" id="selDisEl">
+                <br>
+                <br>
+        </div>
+        <div class ="row">
+            <form class="form-group">
+                <label>Geometry type &nbsp;</label>
+                <select id="type">
+                    <option value="length">Length</option>
+                    <option value="area">Area</option>
+                </select>
+                <label class="checkbox"><input type="checkbox" id="geodesic"/>use geodesic measures</label>
+            </form>
+        </div>
+    </div>
+    <!-- Development (Side Bar Right) Code -->
+    <div class="col-xs-3" style='padding-left: 30px'>
+        <div class="row"> Mouse: <span id="mouse"></span></div>
+        <div class="row"> Geo 3857 (X/Y)    : <span id="geoLoc"></span></div>
+        <div class="row"> Geo 4326 (Lat/Lon): <span id="geoLoc2"></span></div>
+        <div class="row"><label for="track"> track position <input id="track" type="checkbox"/></label></div>
+    </div>
+
+    <!-- Footer Code-->
+    <div id="canvas-container">
+        <canvas id="canvas" width="605" height="550"></canvas>
+    </div>
+</div>
+<script src="ol-debug.js"></script>
+
+<!--
+    Start of Program
+-->
+
+<script>
+    /**
+     * Consts
+     */
+    var bayshire = ol.proj.transform([-75.8082, 45.3488], 'EPSG:4326', 'EPSG:3857');
+    var state = 'none';
+
+    /**
+     * Styles
+     */
+    var selectedStyleFunction = function(feature, resolution) {
+        return [new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 6,
+                fill: new ol.style.Fill({
+                    color: '#61b7ff'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: '#ffffff',
+                    width: 2
+                })
+            }),
+            text : new ol.style.Text({
+                font: '10px Verdana',
+                text: feature.get('name'),
+                fill: new ol.style.Fill({
+                    color: [64, 64, 64, 1]
+                }),
+                offsetY: 10
+            })
+        })];
+    };
+
+    var StyleFunction = function(feature, resolution) {
+        return [new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 6,
+                fill: new ol.style.Fill({
+                    color: feature.get('colour')
+                }),
+                stroke: new ol.style.Stroke({
+                    color: '#ffffff',
+                    width: 2
+                })
+            }),
+            text : new ol.style.Text({
+                font: '10px Verdana',
+                text: feature.get('name'),
+                fill: new ol.style.Fill({
+                    color: [64, 64, 64, 1]
+                }),
+                offsetY: 10
+            })
+        })];
+    };
+
+
+    // create a style to display our position history (track)
+    var trackStyle = new ol.style.Style({
+        stroke: new ol.style.Stroke({
+            color: 'rgba(0,0,255,1.0)',
+            width: 3,
+            lineCap: 'round'
+        })
+    });
+
+    /**
+     * Features
+     */
+    // This is for making the unit track tail
+    var trackFeature = new ol.Feature({
+        geometry: new ol.geom.LineString([])
+    });
+
+    var unitList = new ol.Collection();
+
+    var unitFeature = new ol.Feature();
+    unitFeature.set('name', 'A1-Kelly');
+    unitFeature.set('colour', '#2320cc');
+    unitFeature.setGeometry(new ol.geom.Point(bayshire));
+    unitList.push(unitFeature);
+
+    function generateRand (amt) {
+        return Math.random()*amt;
+    }
+
+    function generateRandDir() {
+        var LR = Math.round(Math.random());
+        if (LR == 1) {
+            return 1; // RIGHT or UP
+        } else {
+            return -1; // LEFT or DOWN
+        }
+    }
+
+    function generateUnit (amount) {
+        for (i = 0; i < amount; i++) {
+            var temp = new ol.Feature();
+            temp.set('name', 'OPFOR ' + (i+1))
+            temp.set('colour', '#cc0005');
+
+            var xamount = generateRand(1);
+            var yamount = generateRand(1);
+
+            var geom = new ol.geom.Point(
+                ol.proj.transform(
+                        [-75.8082 + ((yamount/1000) * generateRandDir()),
+                            45.3488 + ((xamount/1000) * generateRandDir())], 'EPSG:4326', 'EPSG:3857'));
+            temp.setGeometry(geom);
+            //temp.setStyle();
+            unitList.push(temp);
+        }
+    }
+    generateUnit(8);
+
+    var positionFeature = new ol.Feature();
+    positionFeature.setStyle(new ol.style.Style({
+        image: new ol.style.Circle({
+            radius: 6,
+            fill: new ol.style.Fill({
+                color: '#3399CC'
+            }),
+            stroke: new ol.style.Stroke({
+                color: '#ffffff',
+                width: 2
+            })
+        })
+    }));
+
+    /**
+     * Layers for display.
+     */
+    var trackLayer = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            features: [trackFeature]
+        }),
+        style: trackStyle
+    });
+
+    var unitLayer = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            features: unitList
+        }),
+        style: StyleFunction
+    });
+
+    var baseLayer = new ol.layer.Tile({
+        source: new ol.source.OSM()
+    });
+
+    /**
+     * Drawing Code Consts
+     */
+    var wgs84Sphere = new ol.Sphere(6378137);
+
+    var source = new ol.source.Vector();
+
+    var drawLayer = new ol.layer.Vector({
+        source: source,
+        style: new ol.style.Style({
+            fill: new ol.style.Fill({
+                color: 'rgba(255, 255, 255, 0.2)'
+            }),
+            stroke: new ol.style.Stroke({
+                color: '#ffcc33',
+                width: 2
+            }),
+            image: new ol.style.Circle({
+                radius: 7,
+                fill: new ol.style.Fill({
+                    color: '#ffcc33'
+                })
+            })
+        })
+    });
+
+    /**
+     * Mouse Control
+     */
+    var mousePositionControl = new ol.control.MousePosition({
+        coordinateFormat: ol.coordinate.createStringXY(4),
+        projection: 'EPSG:4326',
+        className: 'custom-mouse-position',
+        target: document.getElementById('mouse'),
+        undefinedHTML: '---'
+    });
+
+    /**
+     * Unit Selection
+     */
+    var selectionDisplayElement = document.getElementById('selDisEl');
+
+    var selectionInteraction = new ol.interaction.Select({
+        condition: ol.events.condition.click,
+        multi: true,
+        style: selectedStyleFunction
+    });
+
+    function deslection() {
+        state = 'none';
+        consoleText = 'Delection State';
+    }
+
+    // On select or deselect.
+    selectionInteraction.on('select', function(e) {
+        var consoleText = '';
+
+        if (e.selected.length > 0){
+            state = 'selected';
+            var features = e.target.getFeatures();
+            consoleText = features.item(0).get('name') + ' was selected';
+        }
+
+        if (e.selected.length == 0 && e.deselected.length > 0){
+            deslection();
+        }
+
+        consoleText += '<br>' +
+            e.target.getFeatures().getLength() +
+            ' selected features (last operation selected ' +
+            e.selected.length + ' and deselected ' +
+            e.deselected.length + ' features)';
+
+        selectionDisplayElement.innerHTML = consoleText;
+    });
+
+    /**
+     * View.
+     */
+    var view = new ol.View({
+        center: bayshire,
+        zoom: 17
+    });
+
+    /**
+     * The Map.
+     */
+    var map = new ol.Map({
+        controls: ol.control.defaults({
+        }).extend([mousePositionControl]),
+        target: 'map',
+        layers: [baseLayer, trackLayer, unitLayer, drawLayer],
+        view: view
+    });
+
+    // Map Globals
+    map.on('moveend', function (e) {
+        console.log("moved");
+        var localView = map.getView();
+        var center = ol.proj.transform(localView.getCenter(), 'EPSG:3857', 'EPSG:4326');
+
+        document.getElementById('vlon').innerHTML = center[0].toFixed(4);
+        document.getElementById('vlat').innerHTML = center[1].toFixed(4);
+        document.getElementById('vrot').innerHTML = localView.getRotation();
+        document.getElementById('vzom').innerHTML = localView.getZoom();
+    });
+
+    map.addInteraction(selectionInteraction);
+
+    /**
+     *  Unit Movement Code
+     */
+
+    /**
+     * Currently drawn feature.
+     * @type {ol.Feature}
+     */
+    var sketch;
+
+    /**
+     * The help tooltip element.
+     * @type {Element}
+     */
+    var helpTooltipElement;
+
+    /**
+     * Overlay to show the help messages.
+     * @type {ol.Overlay}
+     */
+    var helpTooltip;
+
+    /**
+     * The measure tooltip element.
+     * @type {Element}
+     */
+    var measureTooltipElement;
+
+    /**
+     * Overlay to show the measurement.
+     * @type {ol.Overlay}
+     */
+    var measureTooltip;
+
+    /**
+     * Message to show when the user is drawing a polygon.
+     * @type {string}
+     */
+    var continuePolygonMsg = 'Click to continue drawing the polygon';
+
+    /**
+     * Message to show when the user is drawing a line.
+     * @type {string}
+     */
+    var continueLineMsg = 'Drawing a line';
+
+    /**
+     * Handle pointer move.
+     * @param {ol.MapBrowserEvent} evt
+     */
+    var pointerMoveHandler = function (evt) {
+        if (evt.dragging) {
+            return;
+        }
+
+        /** @type {string} */
+        var helpMsg = 'Click to start drawing';
+
+        if (sketch) {
+            var geom = (sketch.getGeometry());
+            if (geom instanceof ol.geom.Polygon) {
+                helpMsg = continuePolygonMsg;
+            }
+            else if (geom instanceof ol.geom.LineString) {
+                helpMsg = continueLineMsg;
+            }
+        }
+
+        helpTooltipElement.innerHTML = evt.coordinate;
+        helpTooltip.setPosition(evt.coordinate);
+
+        helpTooltipElement.classList.remove('hidden');
+    };
+
+    map.on('pointermove', pointerMoveHandler);
+
+    map.getViewport().addEventListener('mouseout', function () {
+        helpTooltipElement.classList.add('hidden');
+    });
+
+    var typeSelect = document.getElementById('type');
+    var geodesicCheckbox = document.getElementById('geodesic');
+
+    var draw; // global so we can remove it later
+
+    /**
+     * Format length output.
+     * @param {ol.geom.LineString} line The line.
+     * @return {string} The formatted length.
+     */
+    var formatLength = function (line) {
+        var length;
+        if (geodesicCheckbox.checked) {
+            var coordinates = line.getCoordinates();
+            length = 0;
+            var sourceProj = map.getView().getProjection();
+            for (var i = 0, ii = coordinates.length - 1; i < ii; ++i) {
+                var c1 = ol.proj.transform(coordinates[i], sourceProj, 'EPSG:4326');
+                var c2 = ol.proj.transform(coordinates[i + 1], sourceProj, 'EPSG:4326');
+                length += wgs84Sphere.haversineDistance(c1, c2);
+            }
+        } else {
+            length = Math.round(line.getLength() * 100) / 100;
+        }
+        var output;
+        if (length > 100) {
+            output = (Math.round(length / 1000 * 100) / 100) +
+                ' ' + 'km';
+        } else {
+            output = (Math.round(length * 100) / 100) +
+                ' ' + 'm';
+        }
+        return output;
+    };
+
+    /**
+     * Format area output.
+     * @param {ol.geom.Polygon} polygon The polygon.
+     * @return {string} Formatted area.
+     */
+    var formatArea = function (polygon) {
+        var area;
+        if (geodesicCheckbox.checked) {
+            var sourceProj = map.getView().getProjection();
+            var geom = /** @type {ol.geom.Polygon} */(polygon.clone().transform(
+                sourceProj, 'EPSG:4326'));
+            var coordinates = geom.getLinearRing(0).getCoordinates();
+            area = Math.abs(wgs84Sphere.geodesicArea(coordinates));
+        } else {
+            area = polygon.getArea();
+        }
+        var output;
+        if (area > 10000) {
+            output = (Math.round(area / 1000000 * 100) / 100) +
+                ' ' + 'km<sup>2</sup>';
+        } else {
+            output = (Math.round(area * 100) / 100) +
+                ' ' + 'm<sup>2</sup>';
+        }
+        return output;
+    };
+
+    function addInteraction() {
+        var type = (typeSelect.value == 'area' ? 'Polygon' : 'LineString');
+        draw = new ol.interaction.Draw({
+            source: source,
+            finishCondition: click,
+            type: /** @type {ol.geom.GeometryType} */ (type),
+            style: new ol.style.Style({
+                fill: new ol.style.Fill({
+                    color: 'rgba(255, 255, 255, 0.2)'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: 'rgba(0, 0, 0, 0.5)',
+                    lineDash: [10, 10],
+                    width: 2
+                }),
+                image: new ol.style.Circle({
+                    radius: 5,
+                    stroke: new ol.style.Stroke({
+                        color: 'rgba(0, 0, 0, 0.7)'
+                    }),
+                    fill: new ol.style.Fill({
+                        color: 'rgba(255, 255, 255, 0.2)'
+                    })
+                })
+            })
+        });
+        map.addInteraction(draw);
+
+        createMeasureTooltip();
+        createHelpTooltip();
+
+        var listener;
+        draw.on('drawstart', function (evt) {
+                // set sketch
+                sketch = evt.feature;
+
+                /** @type {ol.Coordinate|undefined} */
+                var tooltipCoord = evt.coordinate;
+
+                // This listener is updated in every motion handles the display.
+                listener = sketch.getGeometry().on('change', function (evt) {
+                    var geom = evt.target;
+                    var output;
+                    if (geom instanceof ol.geom.Polygon) {
+                        output = formatArea(geom);
+                        tooltipCoord = geom.getInteriorPoint().getCoordinates();
+                    } else if (geom instanceof ol.geom.LineString) {
+                        output = formatLength(geom);
+                        tooltipCoord = geom.getLastCoordinate();
+                    }
+                    measureTooltipElement.innerHTML = output;
+                    measureTooltip.setPosition(tooltipCoord);
+                });
+            }, this);
+
+        draw.on('drawend', function () {
+                measureTooltipElement.className = 'tooltip tooltip-static';
+                measureTooltip.setOffset([0, -7]);
+                // unset sketch
+                sketch = null;
+                // unset tooltip so that a new one can be created
+                measureTooltipElement = null;
+                createMeasureTooltip();
+                ol.Observable.unByKey(listener);
+            }, this);
+
+        draw.dispatchEvent('drawstart');
+    }
+    addInteraction();
+
+    /**
+     * Creates a new help tooltip
+     */
+    function createHelpTooltip() {
+        if (helpTooltipElement) {
+            helpTooltipElement.parentNode.removeChild(helpTooltipElement);
+        }
+        helpTooltipElement = document.createElement('div');
+        helpTooltipElement.className = 'tooltip hidden';
+        helpTooltip = new ol.Overlay({
+            element: helpTooltipElement,
+            offset: [15, 0],
+            positioning: 'center-left'
+        });
+        map.addOverlay(helpTooltip);
+    }
+
+    /**
+     * Creates a new measure tooltip
+     */
+    function createMeasureTooltip() {
+        if (measureTooltipElement) {
+            measureTooltipElement.parentNode.removeChild(measureTooltipElement);
+        }
+        measureTooltipElement = document.createElement('div');
+        measureTooltipElement.className = 'tooltip tooltip-measure';
+        measureTooltip = new ol.Overlay({
+            element: measureTooltipElement,
+            offset: [0, -15],
+            positioning: 'bottom-center'
+        });
+        map.addOverlay(measureTooltip);
+    }
+
+    /**
+     * Let user change the geometry type.
+     */
+    typeSelect.onchange = function () {
+        map.removeInteraction(draw);
+        addInteraction();
+    };
+
+    /**
+     * Geolocation Code
+     */
+    var geolocation = new ol.Geolocation({
+        projection: view.getProjection()
+    });
+
+    document.getElementById('track').addEventListener('change', function() {
+        geolocation.setTracking(this.checked);
+    });
+
+    // when we get a position update, add the coordinate to the track's
+    // geometry and recenter the view
+    geolocation.on('change', function() {
+        var coordinate = geolocation.getPosition();
+
+        view.setCenter(coordinate);
+        trackFeature.getGeometry().appendCoordinate(coordinate);
+        marker2.setPosition(coordinate);
+
+        var proj = ol.proj.transform(coordinate, 'EPSG:3857', 'EPSG:4326');
+        geoLoc.innerHTML = coordinate[0].toFixed(4) + ', ' + coordinate[1].toFixed(4);
+        geoLoc2.innerHTML = proj[0].toFixed(4) + ', ' + proj[1].toFixed(4);
+    });
+
+    geolocation.on('change:position', function() {
+        var coordinate = geolocation.getPosition();
+
+        positionFeature.setGeometry(coordinate ?
+            new ol.geom.Point(coordinate) : null);
+
+        marker2.setPosition(coordinate);
+    });
+
+    // put a marker at our current position
+    var marker2 = new ol.Overlay({
+        element: document.getElementById('location'),
+        positioning: 'center-center'
+    });
+    map.addOverlay(marker2);
+
+    // rotate the view to match the device orientation
+    var deviceOrientation = new ol.DeviceOrientation({
+        tracking: true
+    });
+
+    deviceOrientation.on('change:heading', onChangeHeading);
+
+    function onChangeHeading(event) {
+        var heading = event.target.getHeading();
+        view.setRotation(-heading);
+    }
+
+</script>
+</body>
+</html>
