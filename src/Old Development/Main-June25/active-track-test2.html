@@ -1,0 +1,320 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <link rel="stylesheet" href="./ol-css/ol.css" type="text/css">
+	<script src="./ol-build/ol-debug.js"></script>
+    <link rel="stylesheet" href="../www/resources/layout.css" type="text/css">
+	
+    <title>Mobile Geolocation Tracking with Orientation</title>
+    <style type="text/css">
+      html, body, .map {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+      }
+      #info {
+          position: absolute;
+          font-size: 0.7em;
+          top: 10px;
+          right: 10px;
+          background-color: lightgrey;
+          padding: 4px;
+      }
+      .button {
+          position: absolute;
+          bottom: 40px;
+          left: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map" class="map"></div>
+    <div id="info"></div>
+    <img id="geolocation_marker" src="http://openlayers.org/en/latest/examples/data/geolocation_marker.png"/>
+    <div class="button">
+        <button id="geolocate">Geolocate Me!</button>
+        <button id="simulate">Simulate</button>
+    </div>
+
+
+<script>
+// creating the view
+var view = new ol.View({
+  center: ol.proj.fromLonLat([5.8713, 45.6452]),
+  zoom: 19
+});
+
+// creating the map
+var map = new ol.Map({
+  layers: [
+    new ol.layer.Tile({
+      source: new ol.source.OSM()
+    })
+  ],
+  target: 'map',
+  controls: ol.control.defaults({
+    attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
+      collapsible: false
+    })
+  }),
+  view: view
+});
+
+// Geolocation marker
+var markerEl = document.getElementById('geolocation_marker');
+var marker = new ol.Overlay({
+  positioning: 'center-center',
+  element: markerEl,
+  stopEvent: false
+});
+map.addOverlay(marker);
+
+// LineString to store the different geolocation positions. This LineString
+// is time aware.
+// The Z dimension is actually used to store the rotation (heading).
+var positions = new ol.geom.LineString([],
+    /** @type {ol.geom.GeometryLayout} */ ('XYZM'));
+
+// Geolocation Control
+var geolocation = new ol.Geolocation(/** @type {olx.GeolocationOptions} */ ({
+  projection: view.getProjection(),
+  trackingOptions: {
+    maximumAge: 10000,
+    enableHighAccuracy: true,
+    timeout: 600000
+  }
+}));
+
+var deltaMean = 500; // the geolocation sampling period mean in ms
+
+// Listen to position changes
+geolocation.on('change', function() {
+  var position = geolocation.getPosition();
+  var accuracy = geolocation.getAccuracy();
+  var heading = geolocation.getHeading() || 0;
+  var speed = geolocation.getSpeed() || 0;
+  var m = Date.now();
+
+  addPosition(position, heading, m, speed);
+
+  var coords = positions.getCoordinates();
+  var len = coords.length;
+  
+  if (len >= 2) {
+    deltaMean = (coords[len - 1][3] - coords[0][3]) / (len - 1);
+  }
+
+  var html = [
+    'Position: ' + position[0].toFixed(2) + ', ' + position[1].toFixed(2),
+    'Accuracy: ' + accuracy,
+    'Heading: ' + Math.round(radToDeg(heading)) + '&deg;',
+    'Speed: ' + (speed * 3.6).toFixed(1) + ' km/h',
+    'Delta: ' + Math.round(deltaMean) + 'ms'
+  ].join('<br />');
+  document.getElementById('info').innerHTML = html;
+});
+
+geolocation.on('error', function() {
+  alert('geolocation error');
+  // FIXME we should remove the coordinates in positions
+});
+
+// convert radians to degrees
+function radToDeg(rad) {
+  return rad * 360 / (Math.PI * 2);
+}
+// convert degrees to radians
+function degToRad(deg) {
+  return deg * Math.PI * 2 / 360;
+}
+// modulo for negative values
+function mod(n) {
+  return ((n % (2 * Math.PI)) + (2 * Math.PI)) % (2 * Math.PI);
+}
+
+function addPosition(position, heading, m, speed) {
+  var x = position[0];
+  var y = position[1];
+  var fCoords = positions.getCoordinates();
+  var previous = fCoords[fCoords.length - 1];
+  var prevHeading = previous && previous[2];
+  
+  if (prevHeading) {
+    var headingDiff = heading - mod(prevHeading);
+
+    // force the rotation change to be less than 180°
+    if (Math.abs(headingDiff) > Math.PI) {
+      var sign = (headingDiff >= 0) ? 1 : -1;
+      headingDiff = -sign * (2 * Math.PI - Math.abs(headingDiff));
+    }
+    heading = prevHeading + headingDiff;
+  }
+  positions.appendCoordinate([x, y, heading, m]);
+
+  // only keep the 20 last coordinates
+  positions.setCoordinates(positions.getCoordinates().slice(-20));
+
+  // FIXME use speed instead
+  if (heading && speed) {
+    markerEl.src = 'http://openlayers.org/en/latest/examples/data/geolocation_marker_heading.png';
+  } else {
+    markerEl.src = 'http://openlayers.org/en/latest/examples/data/geolocation_marker.png';
+  }
+}
+
+var previousM = 0;
+
+// change center and rotation before render
+map.beforeRender(function(map, frameState) {
+  if (frameState !== null) {
+    // use sampling period to get a smooth transition
+    var m = frameState.time - deltaMean * 1.5;
+    m = Math.max(m, previousM);
+    previousM = m;
+    // interpolate position along positions LineString
+    var c = positions.getCoordinateAtM(m, true);
+    var view = frameState.viewState;
+    if (c) {
+      view.center = getCenterWithHeading(c, -c[2], view.resolution);
+      view.rotation = -c[2];
+      marker.setPosition(c);
+    }
+  }
+  return true; // Force animation to continue
+});
+
+// recenters the view by putting the given coordinates at 3/4 from the top or
+// the screen
+function getCenterWithHeading(position, rotation, resolution) {
+  var size = map.getSize();
+  var height = size[1];
+
+  return [
+    position[0] - Math.sin(rotation) * height * resolution * 1 / 4,
+    position[1] + Math.cos(rotation) * height * resolution * 1 / 4
+  ];
+}
+
+// postcompose callback
+function render() {
+  map.render();
+}
+
+// geolocate device
+var geolocateBtn = document.getElementById('geolocate');
+geolocateBtn.addEventListener('click', function() {
+  geolocation.setTracking(true); // Start position tracking
+
+  map.on('postcompose', render);
+  map.render();
+
+  disableButtons();
+}, false);
+
+// simulate device move
+var simulationData;
+var client = new XMLHttpRequest();
+client.open('GET', 'http://openlayers.org/en/latest/examples/data/geolocation-orientation.json');
+
+
+/**
+ * Handle data loading.
+ */
+client.onload = function() {
+  simulationData = JSON.parse(client.responseText).data;
+};
+client.send();
+
+var simulateBtn = document.getElementById('simulate');
+      simulateBtn.addEventListener('click', function() {
+          var coordinates = simulationData;
+
+          var first = coordinates.shift();
+          simulatePositionChange(first);
+
+          var prevDate = first.timestamp;
+          function geolocate() {
+              var position = coordinates.shift();
+              if (!position) {
+                  return;
+              }
+              var newDate = position.timestamp;
+              simulatePositionChange(position);
+              window.setTimeout(function() {
+                  prevDate = newDate;
+                  geolocate();
+              }, (newDate - prevDate) / 0.5);
+  }
+  geolocate();
+
+  map.on('postcompose', render);
+  map.render();
+
+  disableButtons();
+}, false);
+
+function simulatePositionChange(position) {
+  var coords = position.coords;
+  geolocation.set('accuracy', coords.accuracy);
+  geolocation.set('heading', degToRad(coords.heading));
+  var position_ = [coords.longitude, coords.latitude];
+  var projectedPosition = ol.proj.transform(position_, 'EPSG:4326',
+      'EPSG:3857');
+  geolocation.set('position', projectedPosition);
+  geolocation.set('speed', coords.speed);
+  geolocation.changed();
+}
+
+function disableButtons() {
+  geolocateBtn.disabled = 'disabled';
+  simulateBtn.disabled = 'disabled';
+}
+// ACTIVE TRACKING
+const SERVER_IP = '192.168.2.61';
+const SERVER_PORT = '3001';	
+const AT_AJX_DTA_MSG = '';
+const AT_AJX_TIMEOUT = '500';
+	
+function callHome() {
+	$.ajax({
+		type:"GET",
+		url: "http://" + SERVER_IP + ":" + SERVER_PORT + '/',
+		data: AT_AJX_DTA_MSG,
+		datatType: 'text',
+		timeout: AT_AJX_TIMEOUT			
+	})
+	.done(function (data) {
+		param = parseNMEA([data.slice(0,11),(data.slice(13,15)+data.slice(16,25))]);
+		pointFeature.getGeometry().setCoordinates([param[1],param[0]]);
+		
+	})
+	.fail(function (data) {
+		
+	});
+}
+
+function parseNMEA(dataArray)
+{
+	var latDATA = dataArray[0];
+	var longDATA = dataArray[1];
+	
+	var lat_D = latDATA.slice(0,2);
+	var lat_M = latDATA.slice(2,latDATA.length);
+	var return_lat = parseInt(lat_D) + (lat_M/60);
+	
+	var long_D = (longDATA.slice(0,2)-1);
+	var long_M = longDATA.slice(2,longDATA.length);
+	var return_long = parseInt(long_D*-1) + ((long_M*-1)/60);
+	
+	return [return_lat,return_long]
+}
+
+setInterval(function(){
+callHome();
+}, 1000);
+</script>
+  </body>
+</html>

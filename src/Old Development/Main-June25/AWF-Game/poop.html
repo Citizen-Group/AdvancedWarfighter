@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Select Features</title>
+    <link rel="stylesheet" href="http://openlayers.org/en/v3.17.1/css/ol.css" type="text/css">
+    <script src="/ol-build/ol-debug.js"></script>
+  </head>
+  <body>
+    <div id="map" class="map"></div>
+    <form class="form-inline">
+      <label>Action type &nbsp;</label>
+        <select id="type" class="form-control">
+          <option value="click" selected>Click</option>
+          <option value="singleclick">Single-click</option>
+          <option value="pointermove">Hover</option>
+          <option value="altclick">Alt+Click</option>
+          <option value="none">None</option>
+        </select>
+        <span id="status">&nbsp;0 selected features</span>
+    </form>
+    <script>
+
+var vectorSource = new ol.source.Vector({});
+
+var map = new ol.Map({
+  layers: [
+      new ol.layer.Tile({
+          source: new ol.source.OSM({layer: 'sat'})
+      }),
+      new ol.layer.Vector({
+          source: vectorSource
+      })
+  ],
+  target: 'map',
+  view: new ol.View({
+    center: [-11000000, 4600000],
+    zoom: 4
+  })
+});
+
+var thing = new ol.geom.Polygon( [[
+    ol.proj.transform([-16,-22], 'EPSG:4326', 'EPSG:3857'),
+    ol.proj.transform([-44,-55], 'EPSG:4326', 'EPSG:3857'),
+    ol.proj.transform([-88,75], 'EPSG:4326', 'EPSG:3857')
+]]);
+var featurething = new ol.Feature({
+    name: "Thing",
+    geometry: thing
+});
+vectorSource.addFeature( featurething );
+    </script>
+  </body>
+</html>

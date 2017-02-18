@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+<head>
+	<title>Unit Detail</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+
+<script>
+// Import all the data.
+$.getJSON("https://api.myjson.com/bins/3a076", function(data) {
+    console.log(data); // this will show the info it in firebug console
+
+
+// Generate Squad Icons
+var varMex = "";
+$("#squadUnitBar").html(varMex);
+    
+// Unit Squad
+var maxWidth = 10;
+var squadSize = data.TEAM.UNITS_INCOMMAND.length;
+
+for (var i = 0; i < squadSize; i++)
+{
+    // Break on max length.
+    if (i % maxWidth == 0) {
+        varMex = varMex + "<br>";
+    }
+
+    varMex = varMex + '<img src="resources/UnitIco.png">';
+}
+
+$("#squadUnitBar").html(varMex);
+
+$("#unitFirst").text(data.NAME.FIRST);
+});
+
+
+
+</script>
+
+</head>
+<body>
+
+	<div class="Marker-DIV">
+		<div class="unitFirst" id="unitFirst">Default Name</div>
+		<div class="squadUnitBar" id="squadUnitBar"> </div>
+	</div>
+
+</body>
+</html>

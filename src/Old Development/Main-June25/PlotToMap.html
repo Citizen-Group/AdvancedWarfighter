@@ -1,0 +1,128 @@
+<html>
+
+<head>
+	<link rel="stylesheet" href="ol-css/ol.css" type="text/css">
+
+	<style>
+		.map {
+			height: 200px;
+			width: 80%;
+		}
+	</style>
+	<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+
+	<script src="ol-build/ol-debug.js" type="text/javascript"></script>
+
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+	<!-- Add icon library -->
+	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
+	
+</head>
+
+<body>
+	<div class="container">
+		<button id="ajax" type="button" class="btn btn-lg btn-default">Send AJAX</button>
+		<p>
+		<div class="form-group">
+			<label for="input">KEY=VALUE:</label>
+			<input type="text" class="form-control" id="input">
+		</div>
+		<br>
+		<div id="alert" class="alert alert-block">
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+			<h4>Response:</h4>
+			<span id="lol">Response Text From AJAX.</p>
+		</div>
+		<div id='map' class='map'></div>
+	</div>
+
+	<script>
+var pointFeature = new ol.Feature({
+	geometry: new ol.geom.Point([0, 0]),
+	name: 'Null Island'
+	});
+	
+var html3 = '{ "lat": "0", "long": "0" }';
+	
+var map = new ol.Map({
+  layers: [
+    new ol.layer.Tile({
+      source: new ol.source.TileJSON({
+        url: 'https://api.tiles.mapbox.com/v3/mapbox.geography-class.json?secure'
+      })
+    }),
+    new ol.layer.Vector({
+      source: new ol.source.Vector({
+        features: [pointFeature]
+      }),
+      style: new ol.style.Style({
+        image: new ol.style.Icon(/** @type {olx.style.IconOptions} */ ({
+          anchor: [0.5, 46],
+          anchorXUnits: 'fraction',
+          anchorYUnits: 'pixels',
+          opacity: 0.60,
+          src: 'https://openlayers.org/en/v3.18.2/examples/data/icon.png'
+        })),
+        text: new ol.style.Text({
+          textAlign: "Middle",
+          textBaseline: "Left",
+          font: "Arial",
+          size: 13,
+          text: "ID: 1",
+          fill: new ol.style.Fill({color: "black"})
+        })
+      })
+    })
+  ],
+  target: 'map',
+  view: new ol.View({
+	projection: 'EPSG:4326',
+    center: [0, 0],
+    zoom: 5
+  })
+});
+
+	$(document).ready(function () {
+		var param = $("input").val();
+
+		$("#ajax").click(function (e) {
+			$("#alert").hide();
+			e.preventDefault();
+			//jQuery.support.cors = true;
+
+			$.ajax({
+					type: "GET",
+					url: "http://192.168.0.103:3001/",
+					data: $("#input").val(),
+					dataType: 'text',
+					timeout: 500
+				})
+				.done(function (html) {
+					$("#alert").show();
+					html3 = JSON.parse(html);
+					$("#lol").html(html);
+					
+					var lonlat = ol.proj.transform(([4530.937020, -7648.493730]), 'EPSG:4326', 'EPSG:3857');
+					pointFeature.getGeometry().setCoordinates(lonlat);						
+				})
+				.fail(function (html) {
+					$("#alert").show();
+					$("#lol").html('Failure');
+				}).always(function () {
+
+				});
+
+		});
+	});
+	</script>
+</body>
+
+</html>

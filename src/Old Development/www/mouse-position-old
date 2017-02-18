@@ -1,0 +1,152 @@
+var mousePositionControl = new ol.control.MousePosition({
+  coordinateFormat: ol.coordinate.createStringXY(4),
+  projection: 'EPSG:4326',
+  // comment the following two lines to have the mouse position
+  // be placed within the map.
+  className: 'custom-mouse-position',
+  target: document.getElementById('mouse-position'),
+  undefinedHTML: '&nbsp;'
+});
+
+var tileSource = new ol.layer.Tile({ source: new ol.source.OSM()});
+
+var projectionSelect = $('#projection');
+
+projectionSelect.on('change', function() {
+  mousePositionControl.setProjection(ol.proj.get(this.value));
+});
+
+projectionSelect.val(mousePositionControl.getProjection().getCode());
+
+var precisionInput = $('#precision');
+
+precisionInput.on('change', function() {
+  var format = ol.coordinate.createStringXY(this.valueAsNumber);
+  mousePositionControl.setCoordinateFormat(format);
+});
+
+// Map functions
+var overlay = new ol.Overlay({
+          element: document.getElementById('overlay'),
+          positioning: 'bottom-center'
+        });
+		
+var menuoverlay = new ol.Overlay({
+          element: document.getElementById('menu-holder'),
+          positioning: 'middle-center'
+        });
+	
+var source2 = new ol.source.Vector();	
+var vector2 = new ol.layer.Vector({
+  source: source2,
+  style: new ol.style.Style({
+	  fill: new ol.style.Fill({
+      color: 'rgba(142, 255, 255, 0.2)'
+    }),
+    stroke: new ol.style.Stroke({
+      color: '#ffcc33',
+      width: 2
+    }),
+    image: new ol.style.Circle({
+      radius: 7,
+      fill: new ol.style.Fill({
+        color: 'red'
+      })
+    })
+  })
+});
+
+var typeSelect = document.getElementById('type');
+var draw; // global so we can remove it later
+
+function addInteraction() 
+{
+  var value = typeSelect.value;
+  
+  if (value !== 'None') {
+    draw = new ol.interaction.Draw({
+      source: source2,
+      type: (value)
+    });
+	
+    map.addInteraction(draw);
+  }
+}
+
+/**
+ * Let user change the geometry type.
+ * @param {Event} e Change event.
+ */
+typeSelect.onchange = function(e) 
+{
+  map.removeInteraction(draw);
+  addInteraction();
+};
+
+addInteraction();
+
+// Map Object
+var map = new ol.Map({
+  controls: ol.control.defaults({
+    attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
+      collapsible: false
+    })
+  }).extend([mousePositionControl]),
+  layers: [tileSource, vector2],
+  renderer: common.getRendererFromQueryString(),
+  target: 'map',
+  view: new ol.View({
+	center: ol.proj.fromLonLat([-75.72, 45.42]),
+	zoom: 9 
+  })
+});
+
+/*
+// register an event handler for the click event
+map.on('pointermove', function(event) {
+  // extract the spatial coordinate of the click event in map projection units
+  var coord = event.coordinate;
+  // transform it to decimal degrees
+  var degrees = ol.proj.transform(coord, 'EPSG:3857', 'EPSG:4326');
+  // format a human readable version
+  var hdms = ol.coordinate.toStringHDMS(degrees) + '<img width=\"20px\", height=\"20px\", src=\".\/resources/logo-70x70.png\">'; 
+   
+	// update the overlay element's content
+	var element = overlay.getElement();
+	element.innerHTML = hdms;
+	
+	// position the element (using the coordinate in the map's projection)
+	overlay.setPosition(coord);
+	
+	// and add it to the map
+	map.addOverlay(overlay);  
+});
+
+map.on('click', function(event)
+{
+		// extract the spatial coordinate of the click event in map projection units
+		var coord = event.coordinate;
+		// position the element (using the coordinate in the map's projection)
+		menuoverlay.setPosition(coord);
+		// and add it to the map
+		map.addOverlay(menuoverlay);
+});
+*/
+
+// Utility Commands
+function startTime() {
+    var today = new Date();
+    var h = today.getHours();
+    var m = today.getMinutes();
+    var s = today.getSeconds();
+    m = checkTime(m);
+    s = checkTime(s);
+    document.getElementById('time').innerHTML =
+    h + ":" + m + ":" + s;
+    var t = setTimeout(startTime, 500);
+}
+
+function checkTime(i) {
+    if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+    return i;
+}

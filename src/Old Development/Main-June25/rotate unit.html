@@ -1,0 +1,475 @@
+<head>
+	<link rel="stylesheet" href="ol-css/ol.css" type="text/css">
+	
+
+	<script src="ol-build/ol-debug.js" type="text/javascript"></script>
+	<script src="unit_class.js"></script>
+	<script src="helper.js"></script>
+
+	<!-- Add icon library -->
+	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
+	
+	<style>
+		.map {
+			height: 400px;
+			width: 100%;
+		}
+		
+		.info2 {
+		font-size: 0.5em;
+		}
+		
+		#info {
+          position: absolute;
+          font-size: 0.7em;
+          top: 10px;
+          right: 10px;
+          background-color: lightgrey;
+          padding: 4px;
+      }
+	</style>
+	
+	<title>Advanced Warfighter</title>
+
+</head>
+
+<body>
+<div class="container">
+<br>
+<div id="here"><h4>Advanced Warfighter </h4> 
+Console: <span id="text"></span><br>
+<span id="status">&nbsp;0 selected features</span><br>
+<span class="info2" id="info2">&nbsp;</span></div>
+
+<nav class="navbar navbar-light bg-faded">
+  <div class="nav navbar-nav">
+    <a class="nav-item nav-link active" id="units-menu" href="#">Units <span class="sr-only">(current)</span></a>
+    <a class="nav-item nav-link" id="waypoints-menu" href="#">Waypoints</a>
+    <a class="nav-item nav-link" id="strategic-menu" href="#">Strategic</a>
+    <a class="nav-item nav-link" id="data-menu" href="#">Data</a>
+  </div>
+</nav>
+<div class="map" id="map"></div>
+    <form class="form-inline">
+      <label>Action type &nbsp;</label>
+        <select id="type" class="form-control">
+          <option value="click" selected>Click</option>
+          <option value="singleclick">Single-click</option>
+          <option value="pointermove">Hover</option>
+          <option value="altclick">Alt+Click</option>
+          <option value="none">None</option>
+        </select>
+    </form>
+</div>
+<div id="info"></div>
+<script>
+var status = "units";
+document.getElementById("text").innerHTML = status;
+
+document.getElementById("units-menu").addEventListener("click", function(){
+    toggleMenu("units");
+	icon = 'https://openlayers.org/en/v3.18.2/examples/data/icon.png';
+});
+document.getElementById("waypoints-menu").addEventListener("click", function(){
+    toggleMenu("waypoints");
+	icon = './tank.png';
+});
+document.getElementById("strategic-menu").addEventListener("click", function(){
+    toggleMenu("strategic");
+});
+document.getElementById("data-menu").addEventListener("click", function(){
+    toggleMenu("data");
+});
+
+// Process the toggle
+function toggleMenu (menuSelection){
+	if (status != menuSelection)
+	{
+		// Toggle
+		document.getElementById(status + "-menu").classList.remove('active');	
+		document.getElementById(menuSelection + "-menu").classList.add('active');
+	
+		setActive(menuSelection);
+	}
+
+	// Set Active
+	status = menuSelection;
+};
+
+// Process the change of the menu selection.
+function setActive (menuSelection){
+	// Display in debug
+	var menuItem = document.getElementById("text").innerHTML = menuSelection + "-menu";
+	// Do work
+};
+
+function doMenu(TEXT){
+	document.getElementById("text").innerHTML = TEXT;
+};
+
+var currentInteration = null;
+ 
+ 
+ ////////////// Rotation Code
+ // Passing the event
+function rotationFunction(diff, orgi) {
+    var coordX = evt.coordinate[0];
+    var coordY = evt.coordinate[1];
+
+    var feature = map.forEachFeatureAtPixel(evt.pixel,
+        function(feature, layer) {
+            return feature;
+        });
+
+    var layer = map.forEachFeatureAtPixel(evt.pixel,
+        function(feature, layer) {
+            return layer;
+        });
+
+    // This is where I need to get the feature's rotation value.
+    var rotation = Math.random() * 10 + 1;
+    var origin = new ol.geom.Point(coordX, coordY);
+	
+	return 0.2;
+}
+
+function styleFunction (feature) {
+	return new ol.style.Style({
+		image: new ol.style.Circle({
+			radius: 12,
+			fill: new ol.style.Fill({
+				color: 'rgba(100,50,200,0.5)'
+			}),
+			stroke: new ol.style.Stroke({
+				color: 'rgba(120,30,100,0.8)',
+				width: 3
+			})
+		}),
+		text: new ol.style.Text({
+			font: '12px sans-serif',
+			text: feature.get('NAME') +'\n' + feature.get('TYPE') + '\n' + feature.get('COUNTRY'),
+			fill: new ol.style.Fill({
+				color: '#333'
+			}),
+			stroke: new ol.style.Stroke({
+				color: '#fff',
+				width: 2
+			})
+		})
+	})
+};
+
+var pointFeature = new ol.Feature({
+id: 'human',
+geometry: new ol.geom.Point([0, 0]),
+NAME: 'Null Island HQ',
+TYPE: "HEADQUARTERS",
+COUNTRY: "CANADA"	
+});
+
+pointFeature.setId('human');
+pointFeature.setStyle(styleFunction(pointFeature)); 
+
+var icon = './tank.png';
+var aiList = new Array();
+
+///////////////// MAP AREA	
+var vectorSource = new ol.source.Vector({});
+vectorSource.addFeature(pointFeature);
+  
+var map = new ol.Map({
+  layers: [
+    new ol.layer.Tile({
+      source: new ol.source.OSM
+    }),
+    new ol.layer.Vector({
+      source: vectorSource,
+    })
+  ],
+  target: 'map',
+  view: new ol.View({
+    center: [0, 0],
+    zoom: 5
+  })
+});
+
+///////// GEO TELEPORT ON START + Human unit
+
+// Create human by butting empty feature on a layer.
+ var iconFeature = new ol.Feature({
+	id: '1102',
+	geometry: new ol.geom.Point([0, 0]),
+	NAME: "1ACR-A0-ACTUAL",
+	RNAME: {
+		FIRST: "Justin",
+		MIDDLE: "M",
+		LAST: "Kelly"
+	},
+	TYPE: "HEADQUARTERS",
+	STATUS: "HEALTHY",
+	COUNTRY: "CANADA",
+	TEAM: {
+		TEAM_ID: 0,
+		TEAM_NAME: "BRAVO",
+		UNITS_INCOMMAND: [
+		  1000,
+		  1253,
+		  2356,
+		  6532,
+		  5623,
+		  6532
+		],
+		LEADER: "0-A",
+		CMD: "7-C"
+	}
+});
+
+// Using the feature we generate a style and push it to the unit
+iconFeature.setStyle(styleFunction(iconFeature));
+spawnAI ([0,0], 5, 3);
+vectorSource.addFeature(iconFeature);
+
+ // Update the position of the marker dynamically and zoom to position
+ function geoloc() {
+    iconFeature.setGeometry(new ol.geom.Point(locationAct));
+	updateAI(locationAct);
+    //map.getView().setCenter(locationAct);
+    //map.getView().setZoom(18); 
+  };
+ 
+  
+//////////////// SPAWN AI
+// Based on our location spawn x random units to our rear.
+function spawnAI (location, spacing2, amount) {
+	counter = 0;
+	
+	// For each amount.
+	while (counter < amount)
+	{
+		counter++
+		// Spawn a new unit and position it.
+		var aiUnit = new ol.Feature({
+		geometry: new ol.geom.Point([location[0] +  (Math.random() * 10 + (spacing2 * counter)),location[1] +  (Math.random() * 10 + (spacing2 * counter))]),
+		NAME: "1ACR-A0-0" + counter,
+		TYPE: "RIFLEMAN",
+		COUNTRY: "CANADA"		
+		});
+		
+		aiUnit.setStyle(styleFunction(aiUnit));
+		aiList.push(aiUnit);
+		vectorSource.addFeature(aiUnit);
+	}
+};
+
+function updateAI (location)
+{
+	for (let obj in aiList){
+		//aiList[obj].getGeometry().setCoordinates([location[0] +  (Math.random() * 400 + 1), location[1] +  (Math.random() * 400 + 1)], 0);
+	}
+	formationV(location);
+};
+
+function formationV (location){
+var count = aiList.length;
+var yOffset = -20; // meters
+var spacing = 40;	//m
+var length = count * spacing;
+var start = [location[0] - (length/2) + spacing/2, location[1] + yOffset]
+
+	for (let obj in aiList){
+		aiList[obj].getGeometry().setCoordinates([start[0] + (spacing * obj), start[1]], 0);
+	}
+};
+////// Data block
+function dataBlock(){
+  var position = 0;
+  var accuracy = 0;
+  var heading = 0;
+  var speed = 0;
+  var m = Date.now();
+
+  //addPosition(position, heading, m, speed);
+  var units = unit_class.getProperties();
+
+  var html = [hlpr.objToString(units)].join('<br />');
+  document.getElementById('info').innerHTML = html;
+}
+
+function block2(){
+  //addPosition(position, heading, m, speed);
+  var units = unit_class();
+
+  var html = [
+    'Position: ' + 0 + ', ' + 0,
+    'Accuracy: ' + accuracy,
+    'Heading: ' + 0 + '&deg;',
+    'Speed: ' + 0 + ' km/h',
+    'Delta: ' + 0 + 'ms'
+  ].join('<br />');
+  document.getElementById('info').innerHTML = html;
+}
+
+//////////// TRACK
+// ACTIVE TRACKING
+const SERVER_IP = '192.168.2.61';
+const SERVER_PORT = '3001';	
+const AT_AJX_DTA_MSG = '';
+const AT_AJX_TIMEOUT = '500';
+var locationAct;
+/**
+function callHome() {
+	$.ajax({
+		type:"GET",
+		url: "http://" + SERVER_IP + ":" + SERVER_PORT + '/',
+		data: AT_AJX_DTA_MSG,
+		datatType: 'text',
+		timeout: AT_AJX_TIMEOUT			
+	})
+	.done(function (data) {
+		param = parseNMEA([data.slice(0,11),(data.slice(13,15)+data.slice(16,25))]);
+		// One is lat long (which comes from NEMA), the other XY map position.
+		locationAct = ol.proj.transform([param[1],param[0]], 'EPSG:4326','EPSG:3857');
+	})
+	.fail(function (data) {
+					
+	});
+}
+**/
+function parseNMEA(dataArray) {
+	var latDATA = dataArray[0];
+	var longDATA = dataArray[1];
+	
+	var lat_D = latDATA.slice(0,2);
+	var lat_M = latDATA.slice(2,latDATA.length);
+	var return_lat = parseInt(lat_D) + (lat_M/60);
+	
+	var long_D = (longDATA.slice(0,2)-1);
+	var long_M = longDATA.slice(2,longDATA.length);
+	var return_long = parseInt(long_D*-1) + ((long_M*-1)/60);
+	
+	return [return_lat,return_long]
+}
+
+setTimeout(function() {
+	map.getView().setCenter(locationAct);
+	map.getView().setZoom(18); 
+}, 1000);
+
+
+///////////////// MAIN LOOP //////////////////
+//setInterval(function(){
+//callHome();
+//geoloc();
+//dataBlock();
+//}, 500);
+
+////////// Iterate Feature
+function iterateFeature(feature){
+	buffer = '';
+	
+	// For each feature at the pixle point, return an array
+	function Iterate(obj) {
+		for (prop in obj) {
+			if (obj.hasOwnProperty(prop) && isNaN(prop) && prop != 'geometry') {
+			  buffer += prop + ": " + obj[prop] + "<br>";
+			  Iterate(obj[prop]);
+			}
+		}
+	}
+	Iterate(feature);
+	
+	return buffer;
+}
+
+function iterateFeature2(feature){
+	buffer = '';
+	
+	// For each feature at the pixle point, return an array
+	e.selected.forEach(function(feature){
+	function Iterate(obj) {
+		for (prop in obj) {
+			if (obj.hasOwnProperty(prop) && isNaN(prop) && prop != 'geometry') {
+			  buffer += prop + ": " + obj[prop] + "<br>";
+			  Iterate(obj[prop]);
+			}
+		}
+	}
+	Iterate(feature.getProperties());		
+	});
+	
+	return buffer;
+}
+
+/////////////// CNTRL ROTATE
+map.on('click', function(evt) {
+document.getElementById("text").innerHTML = evt.coordinate;
+});
+	var select = null;  // ref to currently selected interaction
+
+	// select interaction working on "singleclick"
+	var selectSingleClick = new ol.interaction.Select();
+
+	// select interaction working on "click"
+	var selectClick = new ol.interaction.Select({
+	condition: ol.events.condition.click
+	});
+
+	// select interaction working on "pointermove"
+	var selectPointerMove = new ol.interaction.Select({
+	condition: ol.events.condition.pointerMove
+	});
+
+	var selectAltClick = new ol.interaction.Select({
+	condition: function(mapBrowserEvent) {
+	  return ol.events.condition.click(mapBrowserEvent) &&
+		  ol.events.condition.altKeyOnly(mapBrowserEvent);
+	}
+	});
+
+	var selectElement = document.getElementById('type');
+
+	var changeInteraction = function() {
+	if (select !== null) {
+	  map.removeInteraction(select);
+	}
+
+	var value = selectElement.value;
+
+	if (value == 'singleclick') {
+	  select = selectSingleClick;
+	} else if (value == 'click') {
+	  select = selectClick;
+	} else if (value == 'pointermove') {
+	  select = selectPointerMove;
+	} else if (value == 'altclick') {
+	  select = selectAltClick;
+	} else {
+	  select = null;
+	}
+
+	if (select !== null) {
+	  map.addInteraction(select);
+	  select.on('select', function(e) {
+		document.getElementById('status').innerHTML = '&nbsp;' +
+			e.target.getFeatures().getLength() +
+			' selected features (last operation selected ' + e.selected.length +
+			' and deselected ' + e.deselected.length + ' features)';
+						
+			if (e.selected != 0)
+			{
+				document.getElementById('info2').innerHTML = hlpr.objToString(feature);
+				//block2(feature);
+			}else {
+				info2.innerHTML = '&nbsp;';
+			}
+	  });
+	}
+};
+      /**
+       * onchange callback on the select element.
+       */
+      selectElement.onchange = changeInteraction;
+      changeInteraction();
+</script>
+</body>
+</html>

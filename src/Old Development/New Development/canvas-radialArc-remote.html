@@ -1,0 +1,30 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+  <script src="jquery.min.js"></script>
+  <script src="pie-menu.js"></script>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+    </style>
+  </head>
+  <body>
+	<button id="dAll"><img width="25" height="20" src="glyphicons_free/glyphicons/png/glyphicons-53-eye-close.png"></button><button id="clear">Clear</button><p>
+    <canvas id="myCanvas" style="border: 3px solid black" width="700px" height="500px"></canvas>
+	
+    <script>
+	var menu = new pieMenu("myCanvas");
+
+	// bind event handler to clear button
+    document.getElementById('clear').addEventListener('click', clearCanvas, false);
+	document.getElementById('dAll').addEventListener('click', menu.mouseMove, false);
+	  
+	function clearCanvas () {
+		context.clearRect(0, 0, myCanvas.width, myCanvas.height);
+	};
+	
+    </script>
+  </body>
+</html>      

@@ -1,0 +1,69 @@
+<html>
+
+<head>
+	<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+	<!-- Add icon library -->
+	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
+</head>
+
+<body>
+	<div class="container">
+		<button id="ajax" type="button" class="btn btn-lg btn-default">Send AJAX</button>
+		<br>
+		<div class="form-group">
+			<label for="input">Name:</label>
+			<input type="text" class="form-control" id="input">
+		</div>
+		<br>
+		<div id="alert" class="alert alert-block">
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+			<h4>Responce:</h4>
+			<p id="lol">Test text test text test text.</p>
+		</div>
+	</div>
+
+	<script>
+	var html3;
+		$(document).ready(function () {
+			var param = $("input").val();
+
+			$("#ajax").click(function (e) {
+				$("#alert").hide();
+				e.preventDefault();
+				//jQuery.support.cors = true;
+
+				$.ajax({
+						type: "GET",
+						url: "http://192.168.0.103:3001/",
+						data: $("#input").val(),
+						dataType: 'text',
+						timeout: 500
+					})
+					.done(function (html) {
+						$("#alert").show();
+						html3 = JSON.parse(html);
+						$("#lol").html(html);
+					})
+					.fail(function (html) {
+						$("#alert").show();
+						$("#lol").html('Failure');
+					}).always(function () {
+
+					});
+
+			});
+		});
+	</script>
+</body>
+
+</html>

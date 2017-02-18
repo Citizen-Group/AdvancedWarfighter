@@ -1,0 +1,198 @@
+<!-- ACTIVE TRACKING TEST, 10/25/2016 -->
+
+<html>
+<head>
+	<link rel="stylesheet" href="ol-css/ol.css" type="text/css">
+
+	<style>
+		.map {
+			height: 200px;
+			width: 80%;
+		}
+	</style>
+	<script src="C:\Users\owner\Desktop\www\Main-June25\AWF-Game\js\jquery.min.js"></script>
+
+	<script src="ol-build/ol-debug.js" type="text/javascript"></script>
+
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+	<!-- Add icon library -->
+	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
+	
+</head>
+
+<body>
+	<div class="container">
+	<br>
+		<div class="form-group">
+			<label for="input">Location</label>
+			<select id="type">
+			<option value="NMEA" >NMEA</option>
+			<option value="Decimial" selected>Decimial</option>
+			</select>
+			<input type="text" class="form-control" id="input" value="">
+		</div>
+		<button id="fly" type="button" class="btn btn-sm btn-default">Fly</button> <button id="reset" type="button" class="btn btn-sm btn-default">Reset</button>
+		<p>
+		<div id='map' class='map'></div>
+		<div id="mouse-position"></div>
+		
+		<form>
+      <label>Projection </label>
+      <select id="projection">
+        <option value="EPSG:4326">EPSG:4326</option>
+        <option value="EPSG:3857">EPSG:3857</option>
+		<option value="EPSG:4326">WS86</option>
+      </select>
+      <label>Precision </label>
+      <input id="precision" type="number" min="0" max="12" value="4"/>
+    </form>
+	
+	</div>
+
+	<script>
+var pointFeature = new ol.Feature({
+	geometry: new ol.geom.Point([0, 0]),
+	name: 'Null Island'
+	});
+	
+var html3 = '{ "lat": "0", "long": "0" }';
+	
+var map = new ol.Map({
+  layers: [
+    new ol.layer.Tile({
+      source: new ol.source.OSM()
+    }),
+    new ol.layer.Vector({
+      source: new ol.source.Vector({
+        features: [pointFeature]
+      }),
+	 style: new ol.style.Style({
+		/**
+        image: new ol.style.Icon(({
+          anchor: [0.5, 46],
+          anchorXUnits: 'fraction',
+          anchorYUnits: 'pixels',
+          opacity: 0.60,
+          src: 'https://openlayers.org/en/v3.18.2/examples/data/icon.png'
+        })),
+		**/
+        text: new ol.style.Text({
+          textAlign: "Middle",
+          textBaseline: "Left",
+          font: "Arial",
+          size: 13,
+          text: "1RCR-A0-ACTUAL",
+          fill: new ol.style.Fill({color: "black"})
+        })
+      })
+    })
+  ],
+  target: 'map',
+  view: new ol.View({
+	projection: 'EPSG:4326',
+    center: [0, 0],
+    zoom: 1
+  })
+});
+var mousePositionControl = new ol.control.MousePosition({
+        coordinateFormat: ol.coordinate.createStringXY(4),
+        projection: 'EPSG:4326',
+        // comment the following two lines to have the mouse position
+        // be placed within the map.
+        className: 'custom-mouse-position',
+        target: document.getElementById('mouse-position'),
+        undefinedHTML: '&nbsp;'
+      });
+	  
+map.addControl(mousePositionControl);
+	  
+	  var projectionSelect = document.getElementById('projection');
+      projectionSelect.addEventListener('change', function(event) {
+        mousePositionControl.setProjection(ol.proj.get(event.target.value));
+      });
+
+      var precisionInput = document.getElementById('precision');
+      precisionInput.addEventListener('change', function(event) {
+        var format = ol.coordinate.createStringXY(event.target.valueAsNumber);
+        mousePositionControl.setCoordinateFormat(format);
+      });
+
+	  // lat +90/90
+	  // long +180/180
+	  // LAT - LONG
+	  var valueFromGPS = [4520.95956,-7648.51118]; // GPS
+	  var valueFromGPS2 = [45.4111700,-75.6981200]; // Ottawa DesDeg
+	  
+	$(document).ready(function () {
+	
+		$("#fly").click(function (e) {
+		e.preventDefault();
+		
+		if ($("#type").val() == "NMEA")
+		{
+			param = parseNMEA($("#input").val().split(','));
+		}
+		else
+		{
+			//jQuery.support.cors = true;
+			param = $("#input").val().split(',');
+		}	
+			// lon, lat
+			pointFeature.getGeometry().setCoordinates([param[1],param[0]]);
+
+		});
+		
+		$("#reset").click(function (e) {
+			e.preventDefault();
+			//jQuery.support.cors = true;
+			var lonlat = [0,0];
+			pointFeature.getGeometry().setCoordinates(lonlat);
+
+		});
+		
+		function callHome() {
+			$.ajax({
+				type:"GET",
+				url: "http://192.168.0.103:3001/"
+				data: $("#input").val|();
+				datatType: 'text',
+				timeout: 100			
+			})
+			.done(function (data) {
+				param = parseNMEA(data.split(','));
+				pointFeature.getGeometry().setCoordinates([param[1],param[0]]);
+			})
+			.fail(function (data) {
+				
+			)};
+		
+		}
+		
+		function parseNMEA(dataArray)
+		{
+			lat1 = dataArray[0];
+			long1 = dataArray[1];
+			
+			a = dataArray[0].slice(0,2);
+			b = (dataArray[0].slice(0,dataArray[0].length-1)/100) / 60;
+			lat1 = parseInt(a) + b;
+			
+			a1 = dataArray[1].slice(0,2);
+			b1 = (dataArray[1].slice(0,dataArray[1].length-1)/100) / 60;
+			long1 = parseInt(a1) + b1;
+			
+			return [lat1,long1*-1]
+		}
+	});
+	</script>
+</body>
+
+</html>

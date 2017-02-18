@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+
+    <style>
+	div{
+	    border: 5px solid red;
+	}
+        .left {
+			margin: 0;
+            height: 500px;
+            width: 180px;
+			float: left;
+        }
+        .middle{
+			margin: 0;
+			width: auto;
+			height: 500px;
+        }
+		
+		.right{
+			margin: 0;
+			height: 500px;
+            width: 350px;
+			float: right;
+        }
+    </style>
+
+</head>
+<body>
+
+<div class="left">x</div>
+<div class="right" id="sidebar"><iframe  width="350px" height="500px" src="file:///C:/Users/Justin%20Kelly/Desktop/www/www/UnitDetail.html"></iframe></div>
+<div class="middle">
+<form><label>Side:</label><br>
+    <input type="radio" name="None">None<br>
+    <input type="radio" name="1000">1000<br>
+    <input type="radio" name="1001">1001
+</form>
+
+<button id="toggle">Click Me</button>
+</div>
+
+<script>
+function toggle (elements, specifiedDisplay) {
+  var element, index;
+
+  elements = elements.length ? elements : [elements];
+  for (index = 0; index < elements.length; index++) {
+    element = elements[index];
+
+    if (isElementHidden(element)) {
+      element.style.display = '';
+
+      // If the element is still hidden after removing the inline display
+      if (isElementHidden(element)) {
+        element.style.display = specifiedDisplay || 'block';
+      }
+    } else {
+      element.style.display = 'none';
+    }
+  }
+  
+  function isElementHidden (element) {
+    return window.getComputedStyle(element, null).getPropertyValue('display') === 'none';
+  }
+}
+
+document.getElementById('toggle').addEventListener('click', function () {
+  toggle(document.querySelectorAll('.right'));
+});
+</script>
+
+
+</body>
+</html>

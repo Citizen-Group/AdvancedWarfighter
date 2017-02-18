@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>[+] Advanced Warfighter </title>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <script src="http://openlayers.org/en/v3.9.0/apidoc/scripts/prettify/prettify.js"></script>
+    <script src="http://openlayers.org/en/v3.9.0/apidoc/scripts/prettify/lang-css.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+    <script src="./resources/prism/prism.min.js"></script>
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css"
+          type="text/css">
+    <link type="text/css" rel="stylesheet" href="http://openlayers.org/en/v3.9.0/apidoc/styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="http://openlayers.org/en/v3.9.0/apidoc/styles/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="http://openlayers.org/en/v3.9.0/apidoc/styles/jaguar.css">
+    <link rel="stylesheet" href="./resources/prism/prism.css" type="text/css">
+    <link rel="stylesheet" href="../css/ol.css" type="text/css">
+    <link rel="stylesheet" href="./resources/layout.css" type="text/css">
+
+    <style>
+        .container {
+            display: table;
+            width: 100%;
+        }
+
+        .left,
+        .middle,
+        .right {
+            display: table-cell;
+            height: 300px;
+        }
+
+        .left {
+            width: 180px;
+            border: 1px solid black;
+        }
+
+        .middle {
+            border: 1px solid black;
+        }
+
+        .right {
+            width: 350px;
+            border: 1px solid black;
+        }
+
+    </style>
+
+</head>
+<body>
+<div class="container">
+    <div class="left"> <p></p>
+        <form><label>DEBUG - Select Unit:</label><br>
+            <input type="radio" name="x" value="None">None<br>
+            <input type="radio" name="x" value="1000">1000<br>
+            <input type="radio" name="x" value="1001">1001<br>
+        </form>
+        <br>
+        <lable>Toggle Sidebar</lable><br>
+        <button id="toggle">toggle</button></div>
+    <div class="middle"><div class="map" id="map"></div></div>
+    <div class="right"></div>
+</div>
+
+
+<script>
+    function toggle (elements, specifiedDisplay) {
+        var element, index;
+
+        elements = elements.length ? elements : [elements];
+        for (index = 0; index < elements.length; index++) {
+            element = elements[index];
+
+            if (isElementHidden(element)) {
+                element.style.display = '';
+
+                // If the element is still hidden after removing the inline display
+                if (isElementHidden(element)) {
+                    element.style.display = specifiedDisplay || 'block';
+                }
+            } else {
+                element.style.display = 'none';
+            }
+        }
+
+        function isElementHidden (element) {
+            return window.getComputedStyle(element, null).getPropertyValue('display') === 'none';
+        }
+    }
+
+    document.getElementById('toggle').addEventListener('click', function () {
+        toggle(document.querySelectorAll('.right'));
+    });
+
+    $(window).resize(function () {
+        var canvasheight;
+        canvasheight = $('#map').parent().css('height');
+        var canvaswidth;
+        canvaswidth = $('#map').parent().css('width');
+
+        $('#map').css("height", canvasheight);
+        $('#map').css("width", canvaswidth);
+
+        map.updateSize();
+    });
+
+</script>
+
+<script src="loader.js?id=main"></script>
+<script src="menu"></script>
+
+
+</body>
+</html>

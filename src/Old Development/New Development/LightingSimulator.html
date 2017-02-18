@@ -1,0 +1,105 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+  <script src="jquery.min.js"></script>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+    </style>
+  </head>
+  <body>
+	<button id="clear">clear</button>
+    <canvas id="myCanvas" style="border: 3px solid black" width="700px" height="500px"></canvas>
+	
+    <script>
+	// Init
+	var colorCounter = 0;
+	
+	var colorBlack = "#000000"
+	var colorPurple = "#cb3594";
+	var colorGreen = "#659b41";
+	var colorYellow = "#ffcf33";
+	var colorBrown = "#986928";
+	
+	var colorArray = [colorBlack, colorPurple, colorGreen, colorYellow, colorBrown]
+
+	var mouseX = 0;
+	var mouseY = 0;
+	
+	var steps = 4;						// The amount of elemets
+	var radius = 100 / 2; 				// Pixle width
+	var thickness = 10;					// Pixle Thick
+	var stepAngle = 2 / steps;			// Angles are 2 (360*/steps)
+	var stepPadding = 0.01;
+	var startAngle = 1.5;				// Up/Top (right is 0|2, left 1)
+	var counterClockwise = true;
+
+	var canvas = document.getElementById('myCanvas');
+	var context = canvas.getContext('2d');
+	
+	// Code
+	
+	$('#myCanvas').mousedown(function(e){
+		mouseX = e.pageX - this.offsetLeft;
+		mouseY = e.pageY - this.offsetTop;
+		draw2();
+	});
+	
+	function getColour()
+	{
+		if (colorCounter >= colorArray.length)
+		{
+			colorCounter = 0;
+		}
+		
+		var x = colorArray[colorCounter];
+		colorCounter++;
+		return x;	
+	};
+	
+	function draw (){
+		var x = mouseX;
+		var y = mouseY;
+
+		context.beginPath();
+		context.arc(x, y, radius, startAngle * Math.PI, endAngle * Math.PI, counterClockwise);
+		context.lineWidth = thickness;
+
+		// line color
+		context.strokeStyle = getColour();
+		context.stroke();
+	};
+	
+	function draw2 (){
+		var x = mouseX;
+		var y = mouseY;
+		
+		for (i = 1; i < steps-1; i++) 
+		{ 
+			var sAdjust = 1.5 + (stepAngle / 2) * i;
+			var eAdjust = 1.5 + (stepAngle / 2) * i;
+			
+			context.arc(x, y, radius,
+			(startAngle - sAdjust) * Math.PI,
+			(startAngle - eAdjust) * Math.PI,
+			counterClockwise);
+			
+			// line properties
+			context.lineWidth = thickness;
+			context.strokeStyle = getColour();
+			context.stroke();
+		}		
+	};
+
+	// bind event handler to clear button
+    document.getElementById('clear').addEventListener('click', clearCanvas, false);
+	  
+	function clearCanvas () {
+		context.clearRect(0, 0, myCanvas.width, myCanvas.height);
+	};
+	
+    </script>
+  </body>
+</html>      

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <link rel="stylesheet" href="../ol-css/ol.css" type="text/css">
+      
+    <style>
+      .map {
+        height: 400px;
+        width: 100%;
+      }
+    </style>
+      
+    <script src="../ol-build/ol.js" type="text/javascript"></script>
+      
+    <title>Advanced Warfighter</title>
+      
+  </head>
+  <body>
+      
+      <h1>Hello Kitty</h1>
+      
+      <script>
+    var mapMarker ={x:0, y:0};
+          
+    function moveUnit(){    
+        
+        var random90 = (Math.random() * 90) - 45;
+        mapMarker.x = mapMarker.x + (random90/10000);
+        mapMarker.y = mapMarker.y + (random90/10000);
+        
+        console.log("x: " + mapMarker.x + ", Y: " + mapMarker.y);        
+    }
+          
+    setInterval(moveUnit, 50);
+    
+
+    
+    </script>
+      
+  </body>
+</html>

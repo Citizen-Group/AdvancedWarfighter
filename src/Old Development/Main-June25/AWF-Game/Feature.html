@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Select Features</title>
+	<link rel="stylesheet" href="http://openlayers.org/en/v3.17.1/css/ol.css" type="text/css">
+	<script src="../ol-build/ol-debug.js"></script>
+</head>
+
+<body>
+	<div id="map" class="map"></div>
+	<form class="form-inline">
+		<label>Action type &nbsp;</label>
+		<select id="type" class="form-control">
+			<option value="click" selected>Click</option>
+			<option value="singleclick">Single-click</option>
+			<option value="pointermove">Hover</option>
+			<option value="altclick">Alt+Click</option>
+			<option value="none">None</option>
+		</select>
+		<span id="status">&nbsp;0 selected features</span>
+	</form>
+	<script>
+		var id2Feature = null;
+		var lastTarget = null;
+		var fireFeature = null;
+		var sightFeature = null;
+
+		var raster = new ol.layer.Tile({
+			source: new ol.source.OSM()
+		});
+
+		var styles = {
+			'PointBLU': [new ol.style.Style({
+        image: new ol.style.Icon(/** @type {olx.style.IconOptions} */ ({
+          anchor: [0.5, 46],
+          anchorXUnits: 'fraction',
+          anchorYUnits: 'pixels',
+          src: './resources/marker.png'
+        }))
+      })],
+			'PointRED': [new ol.style.Style({
+				image: new ol.style.Circle({
+					fill: new ol.style.Fill({
+						color: [255, 0, 0, 0.7]
+					}),
+					stroke: new ol.style.Stroke({
+						color: [255, 0, 0, 1]
+					}),
+					radius: 5
+				})
+			})],
+			'PointSelection': [new ol.style.Style({
+				image: new ol.style.Circle({
+					fill: new ol.style.Fill({
+						color: [0, 255, 0, 0.7]
+					}),
+					stroke: new ol.style.Stroke({
+						color: [0, 255, 0, 1]
+					}),
+					radius: 5
+				})
+			})],
+			'LineStringBLU': [new ol.style.Style({
+				stroke: new ol.style.Stroke({
+					color: 'blue',
+					width: 5
+				})
+			})],
+			'LineStringRED': [new ol.style.Style({
+				stroke: new ol.style.Stroke({
+					color: 'red',
+					width: 5
+				})
+			})],
+			'Thingy': [new ol.style.Style({
+				stroke: new ol.style.Stroke({
+					color: 'red',
+					width: 5
+				})
+			})]
+		};
+
+		// Non Selectable Vector for Range/Sight
+		var varsource2 = new ol.source.Vector({});
+
+		var vector3 = new ol.layer.Vector({
+			source: varsource2
+		});
+
+		var varsource = new ol.source.Vector({
+			url: 'https://api.myjson.com/bins/5cet7',
+			format: new ol.format.GeoJSON()
+		});
+
+		var vector2 = new ol.layer.Vector({
+			source: varsource,
+			style: function (feature, resolution) {
+				var value = feature;
+				var boolx = null;
+
+				if (value.get('SIDE') == 'BLUE') {
+					boolx = feature.getGeometry().getType() + 'BLU';
+				}
+
+				if (value.get('SIDE') == 'RED') {
+					boolx = feature.getGeometry().getType() + 'RED';
+				}
+
+				if (value.get('Name') == 'NEUT') {
+					boolx = 'Thingy';
+				}
+
+				return styles[boolx];
+			}
+		});
+
+		var map = new ol.Map({
+			layers: [raster, vector2, vector3],
+			target: 'map',
+			view: new ol.View({
+				center: ol.proj.transform([-75.7855, 45.3682], 'EPSG:4326', 'EPSG:3857'),
+				zoom: 14
+			})
+		});
+
+		var select = null; // ref to currently selected interaction
+
+		// select interaction working on "singleclick"
+		var selectSingleClick = new ol.interaction.Select();
+
+		// select interaction working on "click"
+		var selectClick = new ol.interaction.Select({
+			condition: ol.events.condition.click,
+			layers: [vector2, raster],
+			style: styles['PointSelection']
+		});
+
+		// select interaction working on "pointermove"
+		var selectPointerMove = new ol.interaction.Select({
+			condition: ol.events.condition.pointerMove
+		});
+
+		var selectAltClick = new ol.interaction.Select({
+			condition: function (mapBrowserEvent) {
+				return ol.events.condition.click(mapBrowserEvent) &&
+					ol.events.condition.altKeyOnly(mapBrowserEvent);
+			}
+		});
+
+		var selectElement = document.getElementById('type');
+
+		var changeInteraction = function () {
+
+			if (select !== null) {
+				map.removeInteraction(select);
+			}
+
+			var value = selectElement.value;
+
+			if (value == 'singleclick') {
+				select = selectSingleClick;
+			} else if (value == 'click') {
+				select = selectClick;
+			} else if (value == 'pointermove') {
+				select = selectPointerMove;
+			} else if (value == 'altclick') {
+				select = selectAltClick;
+			} else {
+				select = null;
+			}
+
+			if (select !== null) {
+
+				map.addInteraction(select);
+
+				/// START
+				select.on('select', function (e) {
+
+					// Hpw we get a item.  
+					var features = select.getFeatures();
+					var feature = features.item(0);
+					var id = null;
+
+					if (feature !== undefined) {
+						id = feature.get('OWNER');
+					} else {
+						id = "None";
+					}
+
+					if (id2Feature !== null) {
+						varsource2.removeFeature(id2Feature);
+						id2Feature = null;
+					}
+
+					if (fireFeature !== null) {
+						varsource2.removeFeature(fireFeature);
+						fireFeature = null;
+					}
+
+					if (sightFeature !== null) {
+						varsource2.removeFeature(sightFeature);
+						sightFeature = null;
+					}
+
+					// First Pass
+					if (lastTarget == null) {
+						lastTarget = e;
+					}
+
+					if (lastTarget.selected.length != 0 && feature !== undefined) {
+						var a1 = lastTarget.selected[0].getGeometry().getExtent();
+						var o1 = ol.extent.getCenter(a1);
+						var start_point = new ol.geom.Point(o1);
+
+						var aa = e.selected[0].getGeometry().getExtent();
+						var oo = ol.extent.getCenter(aa);
+						var end_point = new ol.geom.Point(oo);
+
+						var rawpoints = [
+						[-75, 45],
+						[22, 44]];
+
+						id2Feature = new ol.Feature({
+							name: "Sighte",
+							geometry: new ol.geom.LineString(rawpoints),
+							style: new ol.style.Style({
+								stroke: new ol.style.Stroke({
+									color: 'blue',
+									width: 5
+								})
+							})
+						});
+
+						varsource2.addFeature(id2Feature);
+					}
+
+					// Ensure we are drawing around a real target
+					if (feature !== undefined) {
+
+						var aa = e.selected[0].getGeometry().getExtent();
+						var oo = ol.extent.getCenter(aa);
+
+						var fireRAD = 340;
+						var sightRAD = 1000;
+
+						var fireCircle = new ol.geom.Circle(oo, fireRAD);
+						var sightCircle = new ol.geom.Circle(oo, sightRAD);
+
+						fireFeature = new ol.Feature({
+							name: "Fire Circle",
+							geometry: fireCircle
+						});
+
+						sightFeature = new ol.Feature({
+							name: "Sight Circle",
+							geometry: sightCircle
+						});
+
+						lastTarget = null;
+
+						varsource2.addFeature(fireFeature);
+						varsource2.addFeature(sightFeature);
+					}
+
+					lastTarget = e;
+					document.getElementById('status').innerHTML = 'OwnerID: ' + id + " /// " +
+						e.target.getFeatures().getLength() +
+						' selected features (last operation selected ' + e.selected.length +
+						' and deselected ' + e.deselected.length + ' features)';
+				});
+			} // EndIF for Select
+		};
+
+
+		/**
+		 * onchange callback on the select element.
+		 */
+		selectElement.onchange = changeInteraction;
+		changeInteraction();
+	</script>
+</body>
+
+</html>

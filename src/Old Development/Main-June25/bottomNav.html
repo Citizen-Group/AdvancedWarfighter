@@ -1,0 +1,156 @@
+<!-- BNav -->
+<html>
+
+<head>
+	<title>Bottom Navigation</title>
+	<script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" crossorigin="anonymous"></script>
+
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+	<!-- Add icon library -->
+	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
+
+
+
+	<style>
+		.icon-bar {
+			width: 100%;
+			text-align: center;
+			background-color: #555;
+			overflow: auto;
+		}
+		
+		.icon-bar a {
+			width: 33%;
+			padding: 5px 0;
+			float: left;
+			transition: all 0.3s ease;
+			color: white;
+			font-size: small;
+		}
+		
+		.icon-bar-left a {
+			width: 33%;
+			padding: 5px 0;
+			float: left;
+			transition: all 0.3s ease;
+			color: rgb(6, 102, 255);
+			font-size: small;
+		}
+		
+		.icon-bar a:hover {
+			background-color: #000;
+		}
+		
+		.active {
+			background-color: #4CAF50;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<div class="row" style="background-color: #f5f5f5; height:40px">
+			<div id="nav" class="col-xs-7">
+				<ul class="nav nav-pills">
+					<li role="presentation" class="active"><a href="#">Home</a></li>
+					<li role="presentation"><a href="#">Profile</a></li>
+					<li role="presentation"><a href="#">Mess</a></li>
+				</ul>
+			</div>
+			<div id="nav" class="col-xs-5">
+				<div class="icon-bar">
+					<a class="active" href="#"><img style="padding-bottom: 1px" src="/flags/1x1/us.svg" height="20px"> BLUFOR</a>
+					<a>107th INF </a>
+					<a>Sir. Polaris</a>
+				</div>
+			</div>
+		</div>
+		<br>
+		<div class="row">
+			<div id="nav" class="col-xs-12 small" style="margin-left: 0; background-color: #9a9995">
+				<span style="margin-top: -2px;" class="badge"><a href="#"><img src="\flags\4x3\us.svg" style="width:15px"></a></span> ADVANCED WARFIGHTER PRE ALPHA
+			</div>
+		</div>
+
+		<!-- Pre Body -->
+		<div class="row">
+			<div class="col-xs-12">
+				<center>Notification Zone</center>
+			</div>
+		</div>
+
+		<!-- Body -->
+		<div class="row">
+			<div id="left" class="col-xs-2" style="background-color:#d9d7f2; height:auto; padding-left: 0px;">
+				<p style="small">Draw</p>
+				<div class="icon-bar-left">
+					<a href="#"><i class="fa fa-home"></i></a>
+					<a href="#"><i class="fa fa-search"></i></a>
+					<a href="#"><i class="fa fa-envelope"></i></a>
+					<a href="#"><i class="fa fa-globe"></i></a>
+					<a href="#"><i class="fa fa-trash"></i></a>
+					<a href="#"><i class="fa fa-trash"></i></a>
+				</div>
+				<br>
+				<p style="small">Measure</p>
+				<div class="icon-bar-left">
+					<a href="#"><i class="fa fa-home"></i></a>
+					<a href="#"><i class="fa fa-search"></i></a>
+					<a href="#"><i class="fa fa-envelope"></i></a>
+					<a href="#"><i class="fa fa-globe"></i></a>
+					<a href="#"><i class="fa fa-trash"></i></a>
+					<a href="#"><i class="fa fa-trash"></i></a>
+				</div>
+			</div>
+			<div id="b" class="col-xs-8 poop" style="background-color:#e9ece7; padding-left: 0px;">
+			</div>
+
+			<div id="c" class="col-xs-2 poop" style="background-color:#aaaaaa; padding-left: 0px;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus malesuada nisi sed mollis lobortis. Pellentesque efficitur neque libero, nec interdum sem pharetra et. Curabitur at justo lorem. Proin mollis nunc urna, sed posuere urna pretium eget. Quisque molestie augue ac massa accumsan, eu fermentum nisl commodo. Ut ex risus, ultrices eget lorem nec, semper iaculis quam. Nunc suscipit
+			</div>
+		</div>
+
+		<!-- Bottom -->
+		<div style="width: 970px; margin-top:15px; border-style:solid" class="row">
+			<div class="col-xs-3" style="background-color:#e9ece7; padding-left: 0px;">
+				<img src="http://placehold.it/15x35">
+				<img src="http://placehold.it/35x35">
+				<img src="http://placehold.it/35x35">
+				<img src="http://placehold.it/35x35">
+				<img src=" http://placehold.it/5x35/eee333">
+				<img src="\flags\4x3\ca.svg " style="width:35px; height:15px">
+				<img src="\flags\4x3\ca.svg " style="width:35px; height:15px">
+
+			</div>
+			<div class="col-xs-6" style="background-color:pink; ">
+				<p>Sed ut perspiciatis...</p>
+			</div>
+			<div class="col-xs-3" style="background-color:lightblue; ">
+				<p>Sed ut perspiciatis...</p>
+			</div>
+		</div>
+	</div>
+</body>
+<script>
+	$(document).ready(function () {
+		/*
+				// Grabs all the .poop class objects, gets the height
+				// Then chooses the max height and applies it to all.
+				var heights = $(".poop").map(function () {
+						return $(this).height();
+					}).get(),
+
+					maxHeight = Math.max.apply(null, heights);
+
+				$(".poop").height(maxHeight);*/
+	});
+</script>
+
+</html>

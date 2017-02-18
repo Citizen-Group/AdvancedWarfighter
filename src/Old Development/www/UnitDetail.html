@@ -1,0 +1,193 @@
+<!doctype html>
+<html>
+<head>
+	<title>Unit Detail</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<style ref="text/css">
+
+div {
+	display: block;
+	position: relative;
+	overflow: auto;
+	padding-top: 1px;
+	padding-right: 1px;
+	padding-left: 1px;
+	z-index: 0;
+}
+
+.UnitLookup-Holder {
+	width: 300px;
+	padding: 8px;
+	border: thin #000000 solid;
+	background-color: #caebe8;
+}
+
+.topRow {
+	width: 97%;
+	height: 22px;
+	padding-top: 3px;
+	padding-right: 3px;
+	padding-left: 3px;
+	border: thin #000000 solid;
+	background-color: #fbfdff;
+}
+
+.countryIMG {
+	float: left;
+	width: 35px;
+	height: 20px;
+	padding-top: 1px;
+	padding-right: 3px;
+	padding-left: 1px;
+	border: thin #000000 solid;
+	background-color: #fbfdff;
+}
+
+.countryName {
+	float: left;
+	padding-top: 1px;
+	padding-right: 3px;
+	padding-left: 1px;
+	border: thin #000000 solid;
+	background-color: #fbfdff;
+}
+
+.unitBattalion {
+	text-align: right;
+	float: right;
+	width: 140px;
+	padding-top: 1px;
+	padding-right: 3px;
+	padding-left: 1px;
+	border: thin #000000 solid;
+	background-color: #fbfdff;
+}
+
+.buttons{
+	float: right;
+	padding-top: 1px;
+	padding-right: 3px;
+	padding-left: 5px;
+}
+
+.button-min{
+	float: right;
+	width: 15px;
+	border: thin #000000 solid;
+	background-color: #fbfdff;
+}
+
+.button-close {
+	float: right;
+	width: 15px;
+	border: thin #000000 solid;
+	background-color: #fbfdff;
+}
+
+.unitPicture {
+	width: 80px;
+	height: 80px;
+	background-color: #9966ff;
+}
+
+.unitCodeName {
+	font-style: italic;
+}
+
+.squadUnitBar {
+	height:auto;
+}
+
+.left	{
+	float:left;
+}
+
+.right	{
+	float:right;
+}
+
+img {
+	background: rgb(255, 0, 9);
+}
+
+</style>
+
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+
+	<script>
+	// Import all the data.
+	$.getJSON("https://api.myjson.com/bins/3a076", function(data) {
+		console.log(data); // this will show the info it in firebug console
+
+
+	// Generate Squad Icons
+	var varMex = "";
+	var maxWidth = 10;
+	var squadSize = data.TEAM.UNITS_INCOMMAND.length;
+
+	for (var i = 0; i < squadSize; i++)
+	{
+		// Break on max length.
+		if (i % maxWidth == 0) {
+			varMex = varMex + "<br>";
+		}
+
+		varMex = varMex + '<img src="UnitIco.png">';
+	}
+
+	$("#squadUnitBar").html(varMex);
+
+	$("#unitFirst").text(data.NAME.FIRST);
+	});
+
+
+
+	</script>
+
+</head>
+<body>
+
+<!-- 
+	<script>
+	$.getJSON("https://api.myjson.com/bins/3a076", function(data) {
+    console.log(data); // this will show the info it in firebug console
+	
+	var items = [];
+	
+	$.each( data, function( key, val ) {
+	items.push( "<li id='" + key + "'>" + val + "</li>" );
+	});	
+	
+	$( "<ul/>", {
+	"class": "my-new-list",
+	html: items.join( "" )
+	}).appendTo( "#content-row1" );
+	});
+-->
+
+	<div class="UnitLookup-Holder">
+		<b>Unit Lookup</b>
+		<div class="topRow">
+			<div class="countryIMG" id="countryIMG">CA</div>
+			<div class="countryName" id="countryName">Canada</div>
+			<div class="buttons">
+				<div class="button-close" id="button-close">X</div>
+				<div class="button-min" id="button-min">^</div>
+			</div>
+			<div class="unitBattalion" id="unitBattalion"> 1 RCR Force Recon</div>
+		</div>
+		<div class="unitIDRow">
+			<div class="unitIDCode left">1-0-0 A </div>
+			<div class="unitHP right">100/100</div>
+			<div class="unitCodeName right">DAGGER 22</div>
+		</div>
+		<div class="unitDetailRow">
+			<div class="unitPicture left">img src=</div>
+			<div class="unitName right"> Captain <span class="right" id="unitFirst"></span> Kelly,</div>
+			<div class="unitName right">12345643454353434534</div>
+		</div>
+		<div class="squadUnitBar" id="squadUnitBar"> </div>
+	</div>
+
+</body>
+</html>

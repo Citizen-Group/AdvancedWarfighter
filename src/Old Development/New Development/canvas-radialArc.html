@@ -1,0 +1,591 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+  <script src="jquery.min.js"></script>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+    </style>
+  </head>
+  <body>
+	<button id="dAll">Display All</button><button id="clear">Clear</button><p>
+    <canvas id="myCanvas" style="border: 3px solid black" width="700px" height="500px"></canvas>
+	
+    <script>
+	// Init
+	var colorCounter = 0;
+	
+	var arcAlive = false;
+	var arcX = 0;
+	var arcY = 0;
+	
+	var colorBlack = "#000000"
+	var colorPurple = "#cb3594";
+	var colorGreen = "#659b41";
+	var colorYellow = "#ffcf33";
+	var colorBrown = "#986928";
+	
+	var colorArray = 	[colorBlack, colorPurple, colorGreen,
+						colorYellow, colorBrown]
+
+	var mouseX = 0;
+	var mouseY = 0;
+	
+	var steps = 5;						// The amount of elemets
+	var radius = 250 / 2; 				// Pixle width
+	var thickness = 60;					// Pixle Thick
+	var stepAngle = 2 / steps;			// Angles are 2 (360*/steps)
+	var stepPadding = 0.01;
+	var lineWidth = 5;
+	var startAngle = 1.5;				// Up/Top (right is 0|2, left 1)
+	var counterClockwise = true;
+	
+	var sel = 0; //whichOneSelected();
+	var lvl = 1;
+
+	var canvas = document.getElementById('myCanvas');
+	var context = canvas.getContext('2d');
+	
+	var menuArray = [];
+	
+	// Code
+	
+	$('#myCanvas').click(function(e){
+		
+		// If the ARC is being drawn.
+		if (arcAlive == true ) // And menu isnt being clicked
+		{
+			// Get the magnatiude of the line
+			var x = mouseX - arcX;
+			var y = arcY - mouseY; // corrds are inverted
+			var r = hypot(x,y);
+			
+			console.log("r:" + r);
+			
+			// If it exceeds the menu. Let the menu die. 
+			// else we just fired off a event message.
+			if (r > (radius + thickness /2) * lvl)
+			{
+				arcAlive = false; // Kill the arc
+				// Undraw function()
+				lvl = 0;
+				clearCanvas();	
+			}
+			else {
+				lvl = 2;
+				drawL2Menu()
+			}
+			
+		} else {
+		
+			arcAlive = true;
+			lvl = 1;
+			// Capture the mouse
+			arcX = mouseX;
+			arcY = mouseY;
+			initRadialMenu();
+		}
+	});
+	
+	$('#myCanvas').mousemove(function(e){
+		// keep updating the mouse
+		mouseX = e.pageX - this.offsetLeft;
+		mouseY = e.pageY - this.offsetTop;
+		
+		if (arcAlive == true){
+			clearCanvas();
+			drawRadialMenu();
+			
+			if (lvl == 2)
+			{
+				drawL2Menu()
+			}
+			
+			drawFollowLine();						
+		}
+		// Else do nothing
+	});
+	
+	function menuItem () {
+		this.id = 0;
+		this.startStop = 0;
+		this.endStop = 0;
+		this.center = {x:0,y:0};
+		this.icon = "";
+		this.text = "";
+		this.parent = null;
+		this.children = [];
+	};
+	
+	// Seed menuArray for later drawing.
+	function intMenu (){
+		// Clear the array.
+		menuArray = [];
+		
+		// Load JSON later.	
+		var menuTemp1 = new menuItem();
+		menuTemp1.id = 1;
+		menuTemp1.icon = "/menu/1.png";
+		menuTemp1.text = "1";
+		menuTemp1.parent = null;	
+		menuArray.push(menuTemp1);
+		
+		// Children of 1
+		var menuTemp11 = new menuItem();
+		menuTemp11.id = 11;
+		menuTemp11.icon = "/menu/11.png";
+		menuTemp11.text = "1.1";
+		menuTemp11.parent = 1;	
+		menuArray[0].children.push(menuTemp11);
+		
+		var menuTemp12 = new menuItem();		
+		menuTemp12.id = 12;
+		menuTemp12.icon = "/menu/12.png";
+		menuTemp12.text = "1.2";
+		menuTemp12.parent = 1;	
+		menuArray[0].children.push(menuTemp12);
+				
+		var menuTemp13 = new menuItem();
+		menuTemp13.id = 13;
+		menuTemp13.icon = "/menu/13.png";
+		menuTemp13.text = "1.3";
+		menuTemp13.parent = 1;	
+		menuArray[0].children.push(menuTemp13)
+
+		var menuTemp2 = new menuItem();
+		menuTemp2.id = 2;
+		menuTemp2.icon = "/menu/2.png";
+		menuTemp2.text = "2";
+		menuTemp2.parent = null;	
+		menuArray.push(menuTemp2);
+
+		var menuTemp3 = new menuItem();
+		menuTemp3.id = 3;
+		menuTemp3.icon = "/menu/2.png";
+		menuTemp3.text = "3";
+		menuTemp3.parent = null;	
+		menuArray.push(menuTemp3);
+
+		var menuTemp4 = new menuItem();
+		menuTemp4.id = 4;
+		menuTemp4.icon = "/menu/2.png";
+		menuTemp4.text = "4";
+		menuTemp4.parent = null;	
+		menuArray.push(menuTemp4);
+		
+		var menuTemp5 = new menuItem();
+		menuTemp5.id = 5;
+		menuTemp5.icon = "/menu/2.png";
+		menuTemp5.text = "5";
+		menuTemp5.parent = null;	
+		menuArray.push(menuTemp5);
+	}
+	
+	function getColour(){
+		if (colorCounter >= colorArray.length)
+		{
+			colorCounter = 0;
+		}
+		
+		var x = colorArray[colorCounter];
+		colorCounter++;
+		return x;	
+	};
+	
+	function drawArc (){
+		var x = mouseX;
+		var y = mouseY;
+
+		context.beginPath();
+		context.arc(x, y, radius, startAngle * Math.PI, 1.25 * Math.PI, counterClockwise);
+		context.lineWidth = thickness;
+
+		// line color
+		context.strokeStyle = getColour();
+		context.stroke();
+	};
+	
+	function hypot (x,y){
+		// Eventually replace with Math.hypot(); no support yet on mobile. This can be overloaded.
+		return Math.sqrt(x * x + y * y);	
+	}
+	
+	function fancyMath (){
+		// X/Y Diffrence
+		var x = mouseX - arcX;
+		var y = arcY - mouseY; // corrds are inverted
+		var r = hypot(x,y);
+		var angleTemp = 0;
+		
+		// Orgin is the caller - Arc.
+		// Find the quadrent
+		// Check if left or right hemisphere.
+		if 	(x < 0)	{
+			// Left
+			if (y < 0)
+			{
+				// TAN
+				// Bottom Left
+				//console.log("Location: BR");
+				angleTemp = Math.tan(y/x);
+			}
+			else
+			{
+				// SIN
+				// Upper Left
+				console.log("Location: UL");
+				angleTemp = Math.sin(y/r);
+			}
+		}else {
+			// Right
+			if (y < 0)
+			{
+				// COS
+				// Bottom Right
+				//console.log("Location: BR");
+				angleTemp = Math.cos(x/r);
+			}
+			else
+			{
+				// TAN/COS/SIN
+				// Upper Right
+				//console.log("Location: UR");
+				angleTemp = Math.tan(y/x);
+			}
+		}
+		//console.log("X/Y: [" + x + ", " + y + "]");
+		//console.log("Distance: " + r );
+		
+		/*
+			The Math.atan2() method returns a numeric value between -π and π 
+			representing the angle theta of an (x, y) point. 
+			This is the counterclockwise angle.
+		*/
+		
+		var returnedStartAngle = Math.atan2(y, x);
+		//console.log("mathtan:" + returnedStartAngle);
+		
+		if (returnedStartAngle < 0)
+		{
+			// Bottom Numbers -0 to PI (-0 to 1)
+			returnedStartAngle = returnedStartAngle/Math.PI * -1;
+		}
+		else
+		{
+			// top Numbers PI to +0 (1 to 0)
+			returnedStartAngle = 2 - returnedStartAngle/Math.PI;
+		}
+		console.log("theta:" + returnedStartAngle);
+		return returnedStartAngle;
+	}
+	
+	function drawFollowArc (){
+	clearCanvas();
+	
+	// Using the position from where we first clicked.
+		var x = arcX;
+		var y = arcY;
+
+		// Draw a arc that faces our mouse.
+		// Using fancy math. Find the arc slice that would face our mouse location.
+		var returnedStartAngle = fancyMath();
+		
+		context.beginPath();
+		context.arc(x, y, radius, (returnedStartAngle+stepAngle/2)*Math.PI, (returnedStartAngle-stepAngle/2)*Math.PI, counterClockwise);  //0 to 2*Math.PI
+		context.lineWidth = thickness;
+
+		// line color
+		context.strokeStyle = getColour();
+		context.stroke();
+		
+		context.lineWidth = 2;
+		
+		context.moveTo(arcX, arcY); 
+		context.lineTo(mouseX, mouseY);
+		context.closePath();
+        context.stroke();
+		
+		console.log("Angle: " + returnedStartAngle);
+	};
+	
+	function getCornerXY (center, angle, distance) {
+		p = {x:0,y:0};
+        p.x = center.x + distance * Math.cos(angle);
+        p.y = center.y + distance * Math.sin(angle);
+        return p;	
+	};
+	
+	function findCenterOfStep(start, stop, thickness) {
+		// Draw a inverted triangle facing down based on some ratio
+		// between start and stop points.
+		
+		// Counter ClockWise
+		var origin_xy = {x:arcX, y:arcY};
+		var leftCenPoint = getCornerXY(origin_xy, stop, radius);
+		var rightCenPoint = getCornerXY(origin_xy, start, radius);
+		
+		// Return the center point.
+		// X1 + X2 gives you the distance + the displacement from 0.
+		// Devide by /2 and midpoint is had.
+		var return_x = (leftCenPoint.x + rightCenPoint.x)/2;
+		var return_y = (leftCenPoint.y + rightCenPoint.y)/2;
+		return p = {x:return_x, y:return_y};
+	};
+	
+	function drawNumber(number, xy) {
+		context.font = '20pt Calibri';
+		context.fillText(number, xy.x, xy.y);
+	};
+	
+	function whichOneSelected()	{
+		var angle = fancyMath();
+		
+		var local_startAngle = startAngle; 
+		var adjust = stepAngle/2;
+			
+		// Quickly grab all the bounds of the steps
+		for (i = 0; i < steps; i++) {		
+			// Start
+			var A = local_startAngle + adjust - stepPadding;
+			// Stop
+			var B = local_startAngle - adjust + stepPadding;
+			
+			// if the number passes 3o'clock it will result in negitives. 
+			// Because we start at somthing other then 0, this will often
+			
+			// Cross overs
+			// If this pair has smaller end, the start.
+			// we have crossed over zero.
+			if (B < 0 )
+			{
+				// b to 0, 0 to A
+				if ((B+2 < angle && angle <= 2) || (angle < A && angle >= 0))
+				{
+					return i;
+				}
+				
+			}
+			if (angle >= B && angle <= A) {
+				return i;
+			}
+		
+			
+			local_startAngle = local_startAngle - stepAngle; 			
+		}	
+		
+		return 0;
+	};
+	
+	function drawFollowLine() {
+		context.beginPath();
+		context.lineWidth = lineWidth;		
+		context.moveTo(arcX, arcY); 
+		context.lineTo(mouseX, mouseY);
+		context.closePath();
+		var dis = 10;
+		context.rect(mouseX-dis, mouseY-dis+5, dis*2, dis*2);
+		var mXY = {x:mouseX-dis, y:mouseY-dis};
+		var aXY = {x:100, y:30};
+		drawNumber(mouseX + ", " + mouseY, mXY);
+		sel = whichOneSelected();
+		drawNumber(sel+1, aXY);
+		context.lineWidth = lineWidth;
+		context.strokeStyle = "#333333"
+        context.stroke();
+	}
+	
+	function initRadialMenu() {
+		var x = arcX
+		var y = arcY;
+		var local_startAngle = startAngle; 
+		var adjust = stepAngle/2;
+		
+		intMenu();
+		
+		// Add content to menu array		
+		for (i = 0; i < steps; i++)
+		{
+			var A = local_startAngle + adjust - stepPadding;
+			var B = local_startAngle - adjust + stepPadding;		
+			
+			context.beginPath();
+			context.arc(x, y, radius, A * Math.PI, B * Math.PI, counterClockwise);
+			context.lineWidth = thickness;
+			context.strokeStyle = "#FF1100";
+			context.stroke();
+						
+			// Shift the Start line to the next position
+			local_startAngle = local_startAngle - stepAngle; 
+		}		
+	}
+	
+	function drawRadialMenu() {
+		var x = arcX
+		var y = arcY;
+		var local_startAngle = startAngle; 
+		var adjust = stepAngle/2;
+		
+		for (i = 0; i < steps; i++)
+		{
+			var A = local_startAngle + adjust - stepPadding;
+			var B = local_startAngle - adjust + stepPadding;		
+			
+			context.beginPath();
+			context.arc(x, y, radius, A * Math.PI, B * Math.PI, counterClockwise);
+			context.lineWidth = thickness;
+			
+			if (sel == i){
+				context.strokeStyle = "#FF1100";
+			}
+			else{
+				context.strokeStyle = "#F33300"
+			}
+			
+			context.stroke();
+	
+			var dis = 15; // Ratio of thickness and width.
+			var mXY = findCenterOfStep(local_startAngle * Math.PI, local_startAngle * Math.PI, thickness);
+			context.beginPath();
+			context.rect(mXY.x-dis, mXY.y-dis, dis * 2, dis * 2);
+			context.fillStyle = 'grey';
+			context.fill();
+			context.lineWidth = 1;
+			context.strokeStyle = 'black';
+			context.fillStyle = 'black';
+			//drawNumber(menuArray[i].text, mXY);
+			context.font = '20pt Calibri';
+			context.fillText(menuArray[i].text, mXY.x-dis, mXY.y-dis);
+			context.stroke()
+						
+			// Shift the Start line to the next position
+			local_startAngle = local_startAngle - stepAngle; 
+		}		
+	}
+	
+	function drawL2Menu() {
+		var x = arcX
+		var y = arcY;
+		var local_startAngle = startAngle; 
+		var adjust = stepAngle/2;
+		var rad = radius * 2;
+		
+		for (i = 0; i < steps; i++)
+		{
+			var A = local_startAngle + adjust - stepPadding;
+			var B = local_startAngle - adjust + stepPadding;		
+			
+			context.beginPath();
+			context.arc(x, y, rad, A * Math.PI, B * Math.PI, counterClockwise);
+			context.lineWidth = thickness;
+			
+			if (sel == i){
+				context.strokeStyle = "#FF1100";
+			}
+			else{
+				context.strokeStyle = "#F33300"
+			}
+			
+			context.stroke();
+	
+			var dis = 15; // Ratio of thickness and width.
+			var mXY = findCenterOfStep(local_startAngle * Math.PI, local_startAngle * Math.PI, thickness);
+			context.beginPath();
+			context.rect(mXY.x-dis, mXY.y-dis, dis * 2, dis * 2);
+			context.fillStyle = 'grey';
+			context.fill();
+			context.lineWidth = 1;
+			context.strokeStyle = 'black';
+			context.fillStyle = 'black';
+			//drawNumber(menuArray[i].text, mXY);
+			context.font = '20pt Calibri';
+			context.fillText(menuArray[i].text, mXY.x-dis, mXY.y-dis);
+			context.stroke()
+						
+			// Shift the Start line to the next position
+			local_startAngle = local_startAngle - stepAngle; 
+		}		
+	}
+	
+	function drawFullFollow(){
+		clearCanvas();
+	
+	// Using the position from where we first clicked.
+		var x = arcX;
+		var y = arcY;
+
+		// Draw a arc that faces our mouse.
+		// Using fancy math. Find the arc slice that would face our mouse location.
+		var local_startAngle = fancyMath(); 
+		var adjust = stepAngle/2;
+		
+		for (i = 0; i < steps; i++)
+		{
+			var A = local_startAngle + adjust - stepPadding;
+			var B = local_startAngle - adjust + stepPadding;		
+			
+			context.beginPath();
+			context.arc(x, y, radius, A * Math.PI, B * Math.PI, counterClockwise);
+			context.lineWidth = 75;
+			// line color
+			if (i == 0)
+			{
+				// fix colour
+				context.strokeStyle = "#FFE222";
+			}
+			else
+			{
+				context.strokeStyle = getColour();
+			}
+			
+			context.stroke();
+						
+			// Shift the Start line to the next position
+			local_startAngle = local_startAngle - stepAngle; 
+		}	
+		
+		context.lineWidth = 2;
+		
+		context.moveTo(arcX, arcY); 
+		context.lineTo(mouseX, mouseY);
+		context.closePath();
+        context.stroke();
+		
+		console.log("Angle: " + local_startAngle);
+	};
+	
+	function drawFull (){
+		var x = mouseX;
+		var y = mouseY;
+		var local_startAngle = startAngle; 
+		var adjust = stepAngle/2;
+		
+		for (i = 0; i <= steps; i++)
+		{
+			var A = local_startAngle + adjust;
+			var B = local_startAngle - adjust;		
+			
+			context.beginPath();
+			context.arc(x, y, radius, A * Math.PI, B * Math.PI, counterClockwise);
+			context.lineWidth = thickness;
+
+			// line color
+			context.strokeStyle = getColour();
+			context.stroke();
+						
+			// Shift the Start line to the next position
+			local_startAngle = local_startAngle - stepAngle; 
+		}		
+	};
+
+	// bind event handler to clear button
+    document.getElementById('clear').addEventListener('click', clearCanvas, false);
+	  
+	function clearCanvas () {
+		context.clearRect(0, 0, myCanvas.width, myCanvas.height);
+	};
+	
+    </script>
+  </body>
+</html>      

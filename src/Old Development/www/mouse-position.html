@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <script src="http://openlayers.org/en/v3.9.0/apidoc/scripts/prettify/prettify.js"></script>
+    <script src="http://openlayers.org/en/v3.9.0/apidoc/scripts/prettify/lang-css.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+    <script src="./resources/prism/prism.min.js"></script>
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css"
+          type="text/css">
+    <link type="text/css" rel="stylesheet" href="http://openlayers.org/en/v3.9.0/apidoc/styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="http://openlayers.org/en/v3.9.0/apidoc/styles/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="http://openlayers.org/en/v3.9.0/apidoc/styles/jaguar.css">
+    <link rel="stylesheet" href="./resources/prism/prism.css" type="text/css">
+    <link rel="stylesheet" href="../css/ol.css" type="text/css">
+    <link rel="stylesheet" href="./resources/layout.css" type="text/css">
+    <title>[+] Advanced Warfighter </title>
+
+    <style>
+        .container2 {
+            display: table;
+            width: 100%;
+        }
+
+        .left,
+        .middle,
+        .right {
+            display: table-cell;
+            height: 300px;
+        }
+
+        .left {
+            width: 180px;
+            border: 1px solid black;
+        }
+
+        .middle {
+            border: 1px solid black;
+        }
+
+        .right {
+            width: 350px;
+            border: 1px solid black;
+        }
+
+        .footer{
+            float: left;
+            width: 100%;
+            margin: 0;
+        }
+    </style>
+
+</head>
+<body>
+
+<div class="navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <a class="brand"><img src="unitIco.png">
+                Advanced Warfighter
+                <small>0.0.0.001</small>
+            </a>
+            <ul class="nav navbar-nav pull-right">
+                <li><a href="" class="active">MAP</a></li>
+                <li><a href="">ARMOURY</a></li>
+                <li><a href="">FOURMS</a></li>
+                <li><a href="">[+] LOG IN</a></li>
+                <li class="navbar pull-right" id="time"></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="container2">
+
+    <div class="left">
+        <p></p>
+        <form><label>Side:</label><br>
+            <input type="radio" name="None">None<br>
+            <input type="radio" name="1000">1000<br>
+            <input type="radio" name="1001">1001<br>
+        </form>
+            <button id="toggle">Click Me</button>
+    </div>
+
+    <div class="middle"><div class="map" id="map"></div>
+
+    <div class="right" id="sidebar">
+
+    </div>
+
+
+    </div>
+</div>
+
+<div class="footer">
+    <small>
+        <div id="overlay"
+             style="background-color: white; border-radius: 10px; border: 1px solid black; padding: 5px 10px;">
+            <img src="./resources/logo-70x70.png"></div>
+    </small>
+    <div id="menu-holder"
+         style="background-color: white; width: 220px; height: 125px; border-radius: 10px; border: 1px solid black; padding: 5px 10px;">
+        <center>
+            <iframe width="200" height="113"
+                    src="https://www.youtube.com/embed/utgVNwRqNgM?rel=0&amp;controls=0&amp;showinfo=0"
+                    frameborder="0" allowfullscreen></iframe>
+        </center>
+    </div>
+
+    <form>
+        <label>Geometry type &nbsp;</label>
+        <select id="type">
+            <option value="None">None</option>
+            <option value="Point">Point</option>
+            <option value="LineString">LineString</option>
+            <option value="Polygon">Polygon</option>
+        </select>
+
+        <p>
+            <label>Side;</label>
+            <select id="side">
+                <option value="BLU">BLUFOR</option>
+                <option value="RED">REDFOR</option>
+            </select>
+        <p>
+            <label>Weapon;</label>
+            <select id="wep">
+                <option value="Gun">Gun</option>
+                <option value="Bat">Bat</option>
+            </select>
+        <p>
+            <label>Projection </label>
+            <select id="projection">
+                <option value="EPSG:4326">EPSG:4326</option>
+                <option value="EPSG:3857">EPSG:3857</option>
+            </select>
+            <label>Precision </label>
+            <input id="precision" type="number" min="0" max="12" value="4"/>
+    </form>
+    <div class="span6" id="mouse-position">&nbsp;</div>
+</div>
+
+<script>
+function toggle (elements, specifiedDisplay) {
+  var element, index;
+
+  elements = elements.length ? elements : [elements];
+
+  for (index = 0; index < elements.length; index++) {
+    element = elements[index];
+
+    if (isElementHidden(element)) {
+      element.style.display = '';
+
+      // If the element is still hidden after removing the inline display
+      if (isElementHidden(element)) {
+        element.style.display = specifiedDisplay || 'block';
+      }
+    } else {
+      element.style.display = 'none';
+    }
+  }
+  
+  function isElementHidden (element) {
+    return window.getComputedStyle(element, null).getPropertyValue('display') === 'none';
+  }
+}
+
+window.onresize = function()
+{
+        var div = $('#map');
+        div.height(
+                Math.max( div.height() + ($(window).height() - $('body').height()), 300 )
+        );
+    div.width = "300px";
+        map.updateSize();
+};
+
+document.getElementById('toggle').addEventListener('click', function () {
+  toggle(document.querySelectorAll('.right'));
+});
+
+</script>
+
+
+<script>
+
+    // Disable browser responces for middle mouse and right click.
+    document.getElementById('map').oncontextmenu = function (e) {
+        e = e ? e : window.event;
+        if (e.preventDefault) e.preventDefault(); // For non-IE browsers.
+        else return false; // For IE browsers.
+    };
+    $("#pie").click(function () {
+        alert("The paragraph was clicked.");
+    });
+</script>
+
+<script src="loader.js?id=mouse-position"></script>
+<script src="menu"></script>
+
+</body>
+</html>
+
+	

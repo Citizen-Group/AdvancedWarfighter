@@ -1,0 +1,240 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+  <script src="jquery.min.js"></script>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+    </style>
+  </head>
+  <body>
+	<button id="clear">clear</button>
+    <canvas id="myCanvas" style="border: 3px solid black" width="700px" height="500px"></canvas>
+	
+    <script>
+	// Init
+	var colorCounter = 0;
+	
+	var arcAlive = false;
+	var arcX = 0;
+	var arcY = 0;
+	
+	var colorBlack = "#000000"
+	var colorPurple = "#cb3594";
+	var colorGreen = "#659b41";
+	var colorYellow = "#ffcf33";
+	var colorBrown = "#986928";
+	
+	var colorArray = [colorBlack, colorPurple, colorGreen, colorYellow, colorBrown]
+
+	var mouseX = 0;
+	var mouseY = 0;
+	
+	var steps = 4;						// The amount of elemets
+	var radius = 200 / 2; 				// Pixle width
+	var thickness = 13;					// Pixle Thick
+	var stepAngle = 2 / steps;			// Angles are 2 (360*/steps)
+	var stepPadding = 0.01;
+	var startAngle = 1.5;				// Up/Top (right is 0|2, left 1)
+	var counterClockwise = true;
+
+	var canvas = document.getElementById('myCanvas');
+	var context = canvas.getContext('2d');
+	
+	// Code
+	
+	$('#myCanvas').click(function(e){
+		mouseX = e.pageX - this.offsetLeft;
+		mouseY = e.pageY - this.offsetTop;
+		
+		if (arcAlive == true) // And menu isnt being clicked
+		{
+			arcAlive = false; // Kill the arc
+			// Undraw function()
+			clearCanvas();			
+		}
+		else
+		{
+			arcAlive = true;
+			// Capture the mouse
+			arcX = mouseX;
+			arcY = mouseY;
+			drawFollowArc();
+		}
+	});
+	
+	$('#myCanvas').mousemove(function(e){
+		// keep updating the mouse
+		mouseX = e.pageX - this.offsetLeft;
+		mouseY = e.pageY - this.offsetTop;
+		
+		if (arcAlive == true)
+		{
+			drawFollowArc();
+		}
+		// Else do nothing
+	});
+	
+	function getColour(){
+		if (colorCounter >= colorArray.length)
+		{
+			colorCounter = 0;
+		}
+		
+		var x = colorArray[colorCounter];
+		colorCounter++;
+		return x;	
+	};
+	
+	function drawArc (){
+		var x = mouseX;
+		var y = mouseY;
+
+		context.beginPath();
+		context.arc(x, y, radius, startAngle * Math.PI, 1.25 * Math.PI, counterClockwise);
+		context.lineWidth = thickness;
+
+		// line color
+		context.strokeStyle = getColour();
+		context.stroke();
+	};
+	
+	function hypot (x,y){
+		// Eventually replace with Math.hypot(); no support yet on mobile. This can be overloaded.
+		return Math.sqrt(x * x + y * y);	
+	}
+	
+	function fancyMath (){
+		// X/Y Diffrence
+		var x = mouseX - arcX;
+		var y = arcY - mouseY; // corrds are inverted
+		var r = hypot(x,y);
+		var angleTemp = 0;
+		
+		// Orgin is the caller - Arc.
+		// Find the quadrent
+		// Check if left or right hemisphere.
+		if 	(x < 0)	{
+			// Left
+			if (y < 0)
+			{
+				// TAN
+				// Bottom Left
+				console.log("Location: BR");
+				angleTemp = Math.tan(y/x);
+			}
+			else
+			{
+				// SIN
+				// Upper Left
+				console.log("Location: UL");
+				angleTemp = Math.sin(y/r);
+			}
+		}else {
+			// Right
+			if (y < 0)
+			{
+				// COS
+				// Bottom Right
+				console.log("Location: BR");
+				angleTemp = Math.cos(x/r);
+			}
+			else
+			{
+				// TAN/COS/SIN
+				// Upper Right
+				console.log("Location: UR");
+				angleTemp = Math.tan(y/x);
+			}
+		}
+		console.log("X/Y: [" + x + ", " + y + "]");
+		console.log("Distance: " + r );
+		
+		/*
+			The Math.atan2() method returns a numeric value between -π and π 
+			representing the angle theta of an (x, y) point. 
+			This is the counterclockwise angle.
+		*/
+		
+		var returnedStartAngle = Math.atan2(y, x);
+		console.log("mathtan:" + returnedStartAngle);
+		
+		if (returnedStartAngle < 0)
+		{
+			// Bottom Numbers -0 to PI (-0 to 1)
+			returnedStartAngle = returnedStartAngle/Math.PI * -1;
+		}
+		else
+		{
+			// top Numbers PI to +0 (1 to 0)
+			returnedStartAngle = 2 - returnedStartAngle/Math.PI;
+		}
+		
+		return returnedStartAngle;
+	}
+	
+	function drawFollowArc (){
+	clearCanvas();
+	
+	// Using the position from where we first clicked.
+		var x = arcX;
+		var y = arcY;
+
+		// Draw a arc that faces our mouse.
+		// Using fancy math. Find the arc slice that would face our mouse location.
+		var returnedStartAngle = fancyMath();
+		
+		context.beginPath();
+		context.arc(x, y, radius, (returnedStartAngle-0.25)*Math.PI, returnedStartAngle*Math.PI, counterClockwise);  //0 to 2*Math.PI
+		context.lineWidth = thickness;
+
+		// line color
+		context.strokeStyle = getColour();
+		context.stroke();
+		
+		context.lineWidth = 2;
+		
+		context.moveTo(arcX, arcY); 
+		context.lineTo(mouseX, mouseY);
+		context.closePath();
+        context.stroke();
+		
+		console.log("Angle: " + returnedStartAngle);
+	};
+	
+	function drawFull (){
+		var x = mouseX;
+		var y = mouseY;
+		var local_startAngle = startAngle; 
+		var adjust = stepAngle/2;
+		
+		for (i = 0; i <= steps; i++)
+		{
+			var A = local_startAngle + adjust;
+			var B = local_startAngle - adjust;		
+			
+			context.beginPath();
+			context.arc(x, y, radius, A * Math.PI, B * Math.PI, counterClockwise);
+			context.lineWidth = thickness;
+
+			// line color
+			context.strokeStyle = getColour();
+			context.stroke();
+						
+			// Shift the Start line to the next position
+			local_startAngle = local_startAngle - stepAngle; 
+		}		
+	};
+
+	// bind event handler to clear button
+    document.getElementById('clear').addEventListener('click', clearCanvas, false);
+	  
+	function clearCanvas () {
+		context.clearRect(0, 0, myCanvas.width, myCanvas.height);
+	};
+	
+    </script>
+  </body>
+</html>      

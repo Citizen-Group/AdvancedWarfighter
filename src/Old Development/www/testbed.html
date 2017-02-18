@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"> </script>
+    <title></title>
+
+    <style>
+        #menu-holder {
+            background-color: #878a8d;
+            width: 88px;
+            height: auto;
+            border-radius: 10px;
+            border: 1px solid #000000;
+            padding: 8px 5px;
+            font-family: 'Quattrocento Sans', sans-serif;
+            font-size: small;
+            font-weight: bold;
+            color: #FFFFFF;
+        }
+        .menu-element{
+            padding:0 0 4px;
+        }
+        .menu-element:hover {
+            background-color: #878a8d;
+            border-color: #656565;
+            border-style: outset;
+            border-width: 2px;
+        }
+    </style>
+
+</head>
+<body>
+
+
+<div id="menu-holder">
+    <div class="menu-element" id="menu-element-mve"><img src="./resources/ring.png"> Move</div>
+    <div class="menu-element" id="menu-element-mvef"><img src="./resources/ring.png"> Move Fast</div>
+    <div class="menu-element" id="menu-element-snk"><img src="./resources/ring.png"> Sneak</div>
+    <div class="menu-element" id="menu-element-fre"><img src="./resources/ring.png"> Fire</div>
+    <div class="menu-element" id="menu-element-smk"><img src="./resources/ring.png"> Smoke</div>
+    <div class="menu-element" id="menu-element-defn"><img src="./resources/ring.png"> Defend</div>
+    <div class="menu-element" id="menu-element-amb"><img src="./resources/ring.png"> Ambush</div>
+</div>
+
+<script>
+
+    // Pretend Global Lanuage Flage
+    var USERPROP = {LANGUAGE: 'ENGLISH'};
+
+    // Struct of Menu Choices.
+    // Keeps the code on lock down.
+    // Do localiztion here
+
+    function localizeMenuNames(imp_Name)
+    {
+        // This in production, should call a master look up list from a text file.
+        // Also the function should be much shorter i.e loxal(''); as it will be used everywhere.
+        // Borrow how IFCCS does the localization.
+
+        switch (imp_Name)
+        {
+            case 'move':
+                return 'MOVE';
+
+            case 'move fast':
+                return 'MOVE FAST';
+
+            case 'sneak':
+                return 'SNEAK';
+        }
+
+        // Else
+        return "Missing Name!"
+    }
+
+    function menuProcess (imp_MENU_CHOICE)
+    {
+        switch (imp_MENU_CHOICE)
+        {
+            /*
+                All actions have the same base action.
+                Draw target cursor, Start Line Drawing mode, Use color,
+                Send "action message" to the server message on L-Click. R-Click is cancel.
+
+                For now, the action code is placed at the bottom of process. Later to be
+                better modularized.
+            */
+            case MENU_CHOICE.MOVE:
+                break;
+            case MENU_CHOICE.MOVE_FAST:
+                break;
+            case MENU_CHOICE.SNEAK:
+                break;
+        }
+
+        // Action Code
+        //  Actions here percolate back to the draw code.
+        // >> Base on imp_MENU_CHOICE, your behavior is:
+        // SetCursor("CURSORS.Targeting");
+        // SetMode("Draw-Line"); <- States
+        // SetDrawColour(imp_MENU_CHOICE.color);
+
+        // Somewhere else on left click
+        // SendMessage("imp_MENU_CHOICE);
+
+        // Somewhere else on right click
+        // SetMode(None);
+        //      Resets all drawing values to zero.
+
+    }
+
+    var MENU_CHOICE = Object.freeze(
+            {
+                "MOVE": {name: localizeMenuNames('move', USERPROP.LANGUAGE), color: 'blue', shortword: 'mve'},
+                "MOVE_FAST": {name: localizeMenuNames('move fast', USERPROP.LANGUAGE), color: 'purple', shortword: 'mvef'},
+                "SNEAK": {name: localizeMenuNames('sneak',USERPROP.LANGUAGE), color: 'yellow', shortword: 'snk'}
+            });
+
+    // There is a better way to do this, but I cant get it to work at the moment
+    // Do a catch all, ask the DIV for it's ID, process and mail out.
+
+    // Move
+    $('#menu-element-mve').click(function(){
+        console.log(MENU_CHOICE.MOVE.name + " Handler");
+        menuProcess(MENU_CHOICE.MOVE);
+    });
+
+    // Move Fast
+    $('#menu-element-mvef').click(function(){
+        console.log(MENU_CHOICE.MOVE_FAST.name + " Handler");
+        menuProcess(MENU_CHOICE.MOVE_FAST);
+    });
+
+    // Sneak / Move Slow
+    $('#menu-element-snk').click(function(){
+        console.log(MENU_CHOICE.SNEAK.name + " Handler");
+        menuProcess(MENU_CHOICE.SNEAK);
+    });
+
+    // Fire
+    $('#menu-element-fre').click(function(){
+        console.log("Fire Handler");
+    });
+
+    // Use Smoke
+    $('#menu-element-smk').click(function(){
+        console.log("Use Smoke Handler");
+    });
+
+    // Defend Direction
+    $('#menu-element-defn').click(function(){
+        console.log("Defend Direction Handler");
+    });
+
+    // Ambush Direction
+    $('#menu-element-amb').click(function(){
+        console.log("Ambush Handler");
+    });
+
+</script>
+
+</body>
+</html>

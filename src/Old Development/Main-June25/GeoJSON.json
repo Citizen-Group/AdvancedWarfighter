@@ -1,0 +1,20 @@
+// GEOJSON File.
+{
+"type":"FeatureCollection",
+"features":[
+	{
+	"type":"Feature",
+	"properties":{
+		"marker-color":"#1b88e2",
+		"marker-size":"medium",
+		"marker-symbol":"",
+		"OWNER":"00001",
+		"SIDE":"BLUE",
+		"TYPE":"INF"
+		},
+	"geometry":{
+		"type":"Point",
+		"coordinates":[37.41,8.82]
+		}
+	}] 
+}

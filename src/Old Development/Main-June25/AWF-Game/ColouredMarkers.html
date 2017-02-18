@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <link rel="stylesheet" href="../ol-css/ol.css" type="text/css">
+    <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
+    <style>
+      .map {
+        height: 400px;
+        width: 100%;
+      }
+		
+	  #marker {
+        width: 20px;
+        height: 20px;
+        border: 1px solid #088;
+        border-radius: 10px;
+        background-color: #0FF;
+        opacity: 0.5;
+      }
+      #vienna {
+        text-decoration: underline;
+        color: darkblue;
+        font-size: 8pt;
+        font-weight: bold;
+        text-shadow: black 0.1em 0.1em 0.2em;
+      }
+      .popover-content {
+        min-width: 180px;
+      }
+    </style>
+      
+    <script src="../ol-build/ol-debug.js"> </script>
+	<script src="js/jquery.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	  	  
+	<body>
+	 <div id="titleDIV" title="title DIV"></div> 
+     <div id="map" class="map"></div>
+	  
+	  <div style="display: none;">
+      <!-- Clickable label for Vienna -->
+      <a class="overlay" id="vienna" target="_blank" href="http://en.wikipedia.org/wiki/Vienna">Vienna</a>
+      <div id="marker" title="Marker"></div>
+      <!-- Popup -->
+      <div id="popup" title="Welcome to ol3"></div>
+      </div>
+	  
+    <form class="form-inline">
+      <label>Geometry type &nbsp;</label>
+      <select id="type">
+        <option value="Point">Point</option>
+        <option value="LineString">LineString</option>
+        <option value="Polygon">Polygon</option>
+		</select>
+    </form>
+	   
+		<div id="consoleDIV" title="Console DIV"></div> 
+		<script type="text/javascript"> document.getElementById('consoleDIV').innerHTML = "Console DIV. AFW 2016 (C)." + new Date().toLocaleString();</script>
+		<script type="text/javascript"> setInterval(function(){ document.getElementById('titleDIV').innerHTML = "Welcome Evelyn: " + new Date().toLocaleString();}, 1000);</script>
+	   
+	   <script>
+	  var iconFeatures = new ol.source.Vector({});
+		   
+      var hq = new ol.Feature({
+        geometry: new ol.geom.Point(ol.proj.fromLonLat([12.5, 41.9]))
+      });
+		   
+	 var red = new ol.Feature({
+        geometry: new ol.geom.Point(ol.proj.fromLonLat([12.5, 41.9]))
+      });
+
+      var blu = new ol.Feature({
+        geometry: new ol.geom.Point(ol.proj.fromLonLat([-0.12755, 51.507222]))
+      });
+
+      var gren = new ol.Feature({
+        geometry: new ol.geom.Point(ol.proj.fromLonLat([-3.683333, 40.4]))
+      });
+		   
+		   
+		var REDc = '#FF0000';
+		var GREEN = [113, 140, 0];
+		var BLUc = '#4271AE';
+		//var icoURL = 'resources/data/flat.png';
+		var icoURL = 'resources/data/admin.png';
+		var hqURL = 'resources/data/hq.png';
+		var hqURL2 = 'resources/data/NATO-INF.png';
+		   
+
+		hq.setStyle(new ol.style.Style({
+        image: new ol.style.Icon(/** @type {olx.style.IconOptions} */ ({
+          color: REDc,
+          src: hqURL
+        }))
+      }));
+		   
+      red.setStyle(new ol.style.Style({
+        image: new ol.style.Icon(/** @type {olx.style.IconOptions} */ ({
+          color: REDc,
+          src: icoURL
+        }))
+      }));
+
+      blu.setStyle(new ol.style.Style({
+        image: new ol.style.Icon(/** @type {olx.style.IconOptions} */ ({
+          color: BLUc,
+          src: icoURL
+        }))
+      }));
+
+      gren.setStyle(new ol.style.Style({
+        image: new ol.style.Icon(/** @type {olx.style.IconOptions} */ ({
+          color: GREEN,
+          src: icoURL
+        }))
+      }));
+		   
+	iconFeatures = [hq, red, blu, gren];
+		   
+	var vectorSource = new ol.source.Vector({
+        features: iconFeatures
+      });
+		   
+	// Create a bunch of icons and add to source vector
+    var max = 1500*3;
+	for (var i = 0; i < max; i++)
+	{
+		var iconFeature = new ol.Feature({
+		  geometry: new  
+			ol.geom.Point(ol.proj.transform([Math.random() * 360-180, Math.random() * 180-90], 'EPSG:4326',   'EPSG:3857')),
+		name: 'Bad Guy ' + i,
+		Cats: 4000,
+		Meow: 500
+		});
+		
+		var mexico = '';
+		
+		if (i < (max/3)) 
+		{
+			mexico = REDc;
+		} 
+		else if (i > (max/3) && i < (max/3)*2) 
+		{
+			mexico = BLUc;
+		} 
+		else 
+		{
+			mexico = GREEN;
+		}
+
+		iconFeature.setStyle(new ol.style.Style({
+		image: new ol.style.Icon(({
+		color: mexico,
+		src: hqURL2 }))
+		}));
+
+		vectorSource.addFeature(iconFeature);
+	}
+
+	  // #####
+
+
+      var vectorLayer = new ol.layer.Vector({
+        source: vectorSource
+      });
+
+      var rasterLayer = new ol.layer.Tile({
+        source: new ol.source.OSM()
+      });
+		   
+	  // #####
+		   
+	  var select = new ol.interaction.Select({
+        wrapX: false
+		  
+      });
+
+      var modify = new ol.interaction.Modify({
+        features: select.getFeatures()
+      });
+		   
+	  // ######
+
+      var map = new ol.Map({
+        interactions: ol.interaction.defaults().extend([select, modify]),
+        layers: [rasterLayer, vectorLayer],
+        target: document.getElementById('map'),
+        view: new ol.View({
+          center: ol.proj.fromLonLat([2.896372, 44.60240]),
+          zoom: 3
+        })
+      });
+		   	
+	  // #####
+	  var pos = ol.proj.fromLonLat([16.3725, 48.208889]);
+
+      // Vienna marker
+      var marker = new ol.Overlay({
+        position: pos,
+        positioning: 'center-center',
+        element: document.getElementById('marker'),
+        stopEvent: false
+      });
+		   
+      map.addOverlay(marker);
+
+      // Vienna label
+      var vienna = new ol.Overlay({
+        position: pos,
+        element: document.getElementById('vienna')
+      });
+		   
+      map.addOverlay(vienna);
+
+      // Popup showing the position the user clicked
+      var popup = new ol.Overlay({
+        element: document.getElementById('popup')
+      });
+		   
+      map.addOverlay(popup);
+
+      map.on('dblclick', function(evt) {
+        var element = popup.getElement();
+        var coordinate = evt.coordinate;
+        var hdms = ol.coordinate.toStringHDMS(ol.proj.transform(
+            coordinate, 'EPSG:3857', 'EPSG:4326'));
+
+        $(element).popover('destroy');
+        popup.setPosition(coordinate);
+        // the keys are quoted to prevent renaming in ADVANCED mode.
+        $(element).popover({
+          'placement': 'top',
+          'animation': false,
+          'html': true,
+          'content': '<p>The location you clicked was:</p><code>' + hdms + '</code>'
+        });
+        $(element).popover('show');
+      });
+		   
+	 map.on('moveend', function(evt) {
+		 var coordinate = evt.map.focus_;
+		 
+		 if (coordinate != null)
+		 document.getElementById('consoleDIV').innerHTML = "Console DIV. AFW 2016 (C). <br>" + ol.coordinate.toStringHDMS(ol.proj.transform(
+            coordinate, 'EPSG:3857', 'EPSG:4326'));		 
+	 });
+
+		   
+    </script>
+	   
+  </body>
+	  
+</html>
