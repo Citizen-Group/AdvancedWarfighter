@@ -6,7 +6,7 @@
  * Requires "fakeServer.json". 
  * For development purposes this queryer is currently pointing to a localfile.
  */
-var fakeJson = '{"AWF":{"_uuid": "58b1c31f1 9384586 2f897aa8","cid": 0,"coo": "CA", "latitude": 6850782.3256,"longitude": -6523989.5656,"type": 0,"connected": "2017-01-19 07:10:44","parent": "" }}';
+var fakeJson = '{"ADM":{"_uuid": "58b1c31f1 9384586 2f897aa8","cid": 0,"coo": "CA", "latitude": 6850782.3256,"longitude": -6523989.5656,"type": 0,"connected": "2017-01-19 07:10:44","parent": "" }, "CC1":{"_uuid": "58b1c31f1 23423432 2f897aa8","cid": 1,"coo": "CA", "latitude": 6549228.1902,"longitude": -7857677.3863,"type": 0,"connected": "2017-02-01 08:34:44","parent": "0" }, "CC2":{"_uuid": "58b1c4234 242586 2f897aa8","cid": 3,"coo": "CA", "latitude": 6206219.1186,"longitude": -8375080.2814,"type": 0,"connected": "2017-01-31 02:22:44","parent": "0" }}';
 
 var serverQ = {
     requestServerData: function() {
@@ -25,14 +25,14 @@ var serverQ = {
         }
 
         var featureList = {
-        'type': 'FeatureCollection',
-        'crs': {
-          'type': 'name',
-          'properties': {
-            'name': 'EPSG:3857'
-          }
-        },'features': []
-      };
+            'type': 'FeatureCollection',
+            'crs': {
+            'type': 'name',
+            'properties': {
+                'name': 'EPSG:3857'
+            }
+            },'features': []
+        };
       
     for (var item in jsonData) {
         featureList['features'].push({
@@ -45,7 +45,7 @@ var serverQ = {
             }
         });
     }
-    
+
     return featureList;       
     },
 
