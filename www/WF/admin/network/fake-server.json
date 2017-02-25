@@ -1,0 +1,285 @@
+/* Fake Server.json
+ * Provides filler data for the server administration page for demostration when the ADM server is offline
+*/
+
+/*
+Generator: http://www.json-generator.com/
+Template:
+[
+  {
+    // ADM
+    _uuid: '{{objectId()}}',
+    cid: '{{index()}}',
+    coo: 'CA',
+    latitude: '{{floating(-90.000001, 90)}}',
+    longitude: '{{floating(-180.000001, 180)}}',
+    type: '0', // ADM
+    connected: '{{date(new Date(2017, 0, 11), new Date(), "YYYY-MM-dd hh:mm:ss")}}',
+    parent: ''
+  },
+  // CANADA
+  // Leaf Nodes
+  ['{{repeat(3, 3)}}',
+    {
+      _uuid: '{{objectId()}}',
+      cid: '{{index()}}',
+      coo: 'CA',
+      latitude: '{{floating(6410457.00, 7467102.00)}}',
+      longitude: '{{floating(-1400490.00, -7024860.00)}}',
+      type: '1',
+      connected: '{{date(new Date(2017, 0, 11), new Date(), "YYYY-MM-dd hh:mm:ss")}}',
+      parent: '0'
+    }    
+  ],
+  // Field Nodes
+  ['{{repeat(3, 12)}}',
+   {
+     _uuid: '{{objectId()}}',
+     cid: '{{index()}}',
+     coo: 'CA',
+     latitude: '{{floating(6410457.00, 7467102.00)}}',
+     longitude: '{{floating(-1400490.00, -7024860.00)}}',
+     type: '2',
+     connected: '{{date(new Date(2017, 0, 11), new Date(), "YYYY-MM-dd hh:mm:ss")}}',
+     parent: '{{integer(1,3)}}'
+   }
+  ],
+  // USA
+  // Leaf Nodes
+  ['{{repeat(3, 3)}}',
+    {
+      _uuid: '{{objectId()}}',
+      cid: '{{index()}}',
+      coo: 'US',
+      latitude: '{{floating(6077783.11, 3768773.36)}}',
+      longitude: '{{floating(-13560540.31, -9216474.12)}}',
+      type: '1',
+      connected: '{{date(new Date(2017, 0, 11), new Date(), "YYYY-MM-dd hh:mm:ss")}}',
+      parent: '0'
+    }    
+  ],
+  // Field Nodes
+  ['{{repeat(3, 12)}}',
+   {
+     _uuid: '{{objectId()}}',
+     cid: '{{index()}}',
+     coo: 'US',
+     latitude: '{{floating(6077783.11, 3768773.36)}}',
+     longitude: '{{floating(-13560540.31, -9216474.12)}}',
+     type: '2',
+     connected: '{{date(new Date(2017, 0, 11), new Date(), "YYYY-MM-dd hh:mm:ss")}}',
+     parent: ''
+   }
+  ]
+]
+*/
+[
+  {
+    "_uuid": "58b1c31f193845862f897aa8",
+    "cid": 0,
+    "coo": "CA",
+    "latitude": 29.206481,
+    "longitude": -102.053703,
+    "type": 0,
+    "connected": "2017-01-19 07:10:44",
+    "parent": ""
+  },
+  [
+    {
+      "_uuid": "58b1c31f60401d8bacea1a89",
+      "cid": 0,
+      "coo": "CA",
+      "latitude": 6850782.3256,
+      "longitude": -6523989.5656,
+      "type": 1,
+      "connected": "2017-02-25 04:55:35",
+      "parent": 0
+    },
+    {
+      "_uuid": "58b1c31fdd853e3d5109fc17",
+      "cid": 1,
+      "coo": "CA",
+      "latitude": 6549228.1902,
+      "longitude": -4857677.3863,
+      "type": 1,
+      "connected": "2017-01-20 01:45:14",
+      "parent": 0
+    },
+    {
+      "_uuid": "58b1c31fa2a9a60b7c21bd2e",
+      "cid": 2,
+      "coo": "CA",
+      "latitude": 6497075.5898,
+      "longitude": -3780721.0048,
+      "type": 1,
+      "connected": "2017-01-29 03:08:46",
+      "parent": 0
+    }
+  ],
+  [
+    {
+      "_uuid": "58b1c31f01df9ab3138dad53",
+      "cid": 0,
+      "coo": "CA",
+      "latitude": 6800877.1186,
+      "longitude": -5375080.2814,
+      "type": 2,
+      "connected": "2017-01-21 07:09:33",
+      "parent": 1
+    },
+    {
+      "_uuid": "58b1c31f99e69e1374c8b597",
+      "cid": 1,
+      "coo": "CA",
+      "latitude": 7043437.2737,
+      "longitude": -5229165.3883,
+      "type": 2,
+      "connected": "2017-01-21 12:10:23",
+      "parent": 2
+    },
+    {
+      "_uuid": "58b1c31f3bc565d064a76848",
+      "cid": 2,
+      "coo": "CA",
+      "latitude": 6481003.0878,
+      "longitude": -6402940.1635,
+      "type": 2,
+      "connected": "2017-02-20 10:28:25",
+      "parent": 3
+    },
+    {
+      "_uuid": "58b1c31f6c697aa084d7aca3",
+      "cid": 3,
+      "coo": "CA",
+      "latitude": 7336467.7864,
+      "longitude": -5695853.72,
+      "type": 2,
+      "connected": "2017-01-30 08:38:06",
+      "parent": 2
+    },
+    {
+      "_uuid": "58b1c31fdbe7984607f8c1e6",
+      "cid": 4,
+      "coo": "CA",
+      "latitude": 6429572.3942,
+      "longitude": -1745503.8724,
+      "type": 2,
+      "connected": "2017-02-09 09:57:52",
+      "parent": 3
+    },
+    {
+      "_uuid": "58b1c31f6cbdfa354f632864",
+      "cid": 5,
+      "coo": "CA",
+      "latitude": 6506219.9526,
+      "longitude": -1914352.6455,
+      "type": 2,
+      "connected": "2017-02-18 12:03:12",
+      "parent": 2
+    }
+  ],
+  [
+    {
+      "_uuid": "58b1c31f8c7919a301082e42",
+      "cid": 0,
+      "coo": "US",
+      "latitude": 3824757.71,
+      "longitude": -12320976.38,
+      "type": 1,
+      "connected": "2017-02-15 08:48:19",
+      "parent": 0
+    },
+    {
+      "_uuid": "58b1c31fa4188875fd88703d",
+      "cid": 1,
+      "coo": "US",
+      "latitude": 4916720.32,
+      "longitude": -10328901.13,
+      "type": 1,
+      "connected": "2017-02-20 01:58:27",
+      "parent": 0
+    },
+    {
+      "_uuid": "58b1c31f3502795397896735",
+      "cid": 2,
+      "coo": "US",
+      "latitude": 5537548.97,
+      "longitude": -12845440.79,
+      "type": 1,
+      "connected": "2017-02-18 07:52:05",
+      "parent": 0
+    }
+  ],
+  [
+    {
+      "_uuid": "58b1c31ff5cc79fb74f7e6fa",
+      "cid": 0,
+      "coo": "US",
+      "latitude": 4909465.57,
+      "longitude": -12850598.36,
+      "type": 2,
+      "connected": "2017-02-23 06:55:13",
+      "parent": ""
+    },
+    {
+      "_uuid": "58b1c31f810242e119f4b6d3",
+      "cid": 1,
+      "coo": "US",
+      "latitude": 5707898.83,
+      "longitude": -10805171.1,
+      "type": 2,
+      "connected": "2017-01-17 10:55:55",
+      "parent": ""
+    },
+    {
+      "_uuid": "58b1c31f8a4c8075c3bd5e81",
+      "cid": 2,
+      "coo": "US",
+      "latitude": 3781956.96,
+      "longitude": -13195769.16,
+      "type": 2,
+      "connected": "2017-02-11 05:20:59",
+      "parent": ""
+    },
+    {
+      "_uuid": "58b1c31f3c43b91f4c1d629a",
+      "cid": 3,
+      "coo": "US",
+      "latitude": 5362873,
+      "longitude": -13125818.75,
+      "type": 2,
+      "connected": "2017-02-11 02:59:32",
+      "parent": ""
+    },
+    {
+      "_uuid": "58b1c31f91fa5349570c9f72",
+      "cid": 4,
+      "coo": "US",
+      "latitude": 4198423.07,
+      "longitude": -12616592.39,
+      "type": 2,
+      "connected": "2017-01-24 01:29:24",
+      "parent": ""
+    },
+    {
+      "_uuid": "58b1c31f2e94c3f6c865b037",
+      "cid": 5,
+      "coo": "US",
+      "latitude": 5317224.9,
+      "longitude": -9470788.89,
+      "type": 2,
+      "connected": "2017-02-06 03:29:44",
+      "parent": ""
+    },
+    {
+      "_uuid": "58b1c31f3aaba0f48376951f",
+      "cid": 6,
+      "coo": "US",
+      "latitude": 5762368.28,
+      "longitude": -11817219.05,
+      "type": 2,
+      "connected": "2017-02-01 12:23:46",
+      "parent": ""
+    }
+  ]
+]
