@@ -31,29 +31,22 @@ var serverQ = {
           'properties': {
             'name': 'EPSG:3857'
           }
-        },'features': [
-            {
-                'type': 'Feature',
-                'geometry': {
-                    'type': 'Point',
-                    'coordinates': [jsonData['AWF'].longitude,jsonData['AWF'].latitude]}
-            }]
+        },'features': []
       };
-
-        /* for (var item in jsonData) {
-                featureList += "
-                {
-                    'type': 'Feature',
-                     'geometry': {
-                         'type': 'Point',
-                          'coordinates': [" + jsonData[item].longitude + ', ' + jsonData[item].latitude + "]
-                        }
-                }"
-        }
-        */
-
-        return featureList;
-       
+      
+    for (var item in jsonData) {
+        featureList['features'].push({
+        'type': 'Feature',
+        'geometry': {
+            'type': 'Point',
+            'coordinates': [
+                jsonData[item].longitude,
+                jsonData[item].latitude]
+            }
+        });
+    }
+    
+    return featureList;       
     },
 
     generateTable: function(jsonData) {
