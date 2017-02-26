@@ -51,6 +51,25 @@
             display: none;
             opacity: 0;
         }
+    
+        #marker {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #088;
+            border-radius: 10px;
+            background-color: #0FF;
+            opacity: 0.5;
+        }
+        #vienna {
+            text-decoration: none;
+            color: white;
+            font-size: 11pt;
+            font-weight: bold;
+            text-shadow: black 0.1em 0.1em 0.2em;
+        }
+        .popover-content {
+            min-width: 180px;
+        }
     </style>
 </head>
 
@@ -69,10 +88,14 @@
 				</h1>
 			</div>
 			<div class="row">
-				<div class="col-md-9">
+				<div id='main-div' class="col-md-9">
                     <div class="rel">
                     <div id="map" class="map"></div>
                     <div id="plot"></div>
+                    <div style="display: none;">
+                    <!-- Popup -->
+                    <div id="popup" title="Server Inquiry"></div>
+                    </div>
                 </div>
 				</div>
 				<div class="col-md-3">

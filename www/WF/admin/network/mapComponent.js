@@ -164,14 +164,59 @@ var select = new ol.interaction.Select({
     //some options
 });
 
-map.addInteraction(select);
-  select.on('select', function(e) {
-    /* document.getElementById('status').innerHTML = '&nbsp;' +
-        e.target.getFeatures().getLength() +
-        ' selected features (last operation selected ' + e.selected.length +
-        ' and deselected ' + e.deselected.length + ' features)';'
+var pos = ol.proj.fromLonLat([16.3725, 48.208889]);
 
-        Add Dom lookup, set table to active */
+// Vienna marker
+var marker = new ol.Overlay({
+  position: pos,
+  positioning: 'center-center',
+  element: document.getElementById('marker'),
+  stopEvent: false
+});
+map.addOverlay(marker);
+
+// Vienna label
+var vienna = new ol.Overlay({
+  position: pos,
+  element: document.getElementById('vienna')
+});
+map.addOverlay(vienna);
+
+// Popup showing the position the user clicked
+var popup = new ol.Overlay({
+  element: document.getElementById('popup')
+});
+map.addOverlay(popup);
+
+map.addInteraction(select);
+
+select.on('select', function(evt) {
+    
+  /* Reeminder:
+   * We need to stop the popup from moving
+   * around when you select away from the feature. 
+   * As each select/deselect will run this select function.
+   */ 
+
+  var element = popup.getElement();
+
+  if (evt.selected.length > 0) {
+    var coordinate = evt.mapBrowserEvent.coordinate;
+
+    $(element).popover('destroy');
+    popup.setPosition(coordinate);
+    // the keys are quoted to prevent renaming in ADVANCED mode.
+    $(element).popover({
+      'placement': 'top',
+      'animation': false,
+      'html': true,
+      'content': '<p> Server ID: ' + evt.selected[0].get('name') + '</p>'
+    });
+    $(element).popover('show');
+
+  } else {
+    $(element).popover('destroy');
+  };
 });
 
 var timer = null;
