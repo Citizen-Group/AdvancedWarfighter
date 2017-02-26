@@ -1,3 +1,34 @@
+// Custom Style custom style function
+var customStyleFunction = function(feature, resolution) {
+
+  var source = 'ServerIco.png';
+
+  switch (feature.get('type')) {
+    case 0: 
+      source = 'sico_ADM.png';
+      break;
+    case 1: 
+      source = 'sico_CMD.png';
+      break;
+    case 2: 
+      source = 'sico_SGN.png';
+      break;
+  }
+
+  // Based on the functions params, return a style property set.
+  return [new ol.style.Style({
+  image: new ol.style.Icon(/** @type {olx.style.IconOptions} */ ({
+    anchor: [0.5, 46],
+    anchorXUnits: 'fraction',
+    anchorYUnits: 'pixels',
+    opacity: 0.75,
+    src: source
+  }))
+  })];
+
+};
+
+
 // this example uses d3 for which we don't have an externs file.
 var minVgi = 0;
 var maxVgi = 0.25;
@@ -6,7 +37,6 @@ var bins = 10;
 var CEN_LOCATION_X = 5688923;
 var CEN_LOCATION_Y = -8425029;
 var ZLEVEL = 5;
-
 
 /**
  * Calculate the Vegetation Greenness Index (VGI) from an input pixel.  This
@@ -117,7 +147,8 @@ var map = new ol.Map({
       source: raster
     }),
     new ol.layer.Vector({
-      source: vector2
+      source: vector2,
+      style: customStyleFunction,
     })
   ],
   target: 'map',
@@ -129,6 +160,19 @@ var map = new ol.Map({
   })
 });
 
+var select = new ol.interaction.Select({
+    //some options
+});
+
+map.addInteraction(select);
+  select.on('select', function(e) {
+    /* document.getElementById('status').innerHTML = '&nbsp;' +
+        e.target.getFeatures().getLength() +
+        ' selected features (last operation selected ' + e.selected.length +
+        ' and deselected ' + e.deselected.length + ' features)';'
+
+        Add Dom lookup, set table to active */
+});
 
 var timer = null;
 function schedulePlot(resolution, counts, threshold) {
