@@ -8,60 +8,54 @@
  */
 var fakeJson = '{"ADM":{"_uuid": "58b1c31f1 9384586 2f897aa8","cid": 0,"coo": "CA", "latitude": 6850782.3256,"longitude": -6523989.5656,"type": 0,"connected": "2017-01-19 07:10:44","parent": "" }, "CC1":{"_uuid": "58b1c31f1 23423432 2f897aa8","cid": 1,"coo": "CA", "latitude": 6549228.1902,"longitude": -7857677.3863,"type": 1,"connected": "2017-02-01 08:34:44","parent": "0" }, "CC2":{"_uuid": "58b1c4234 242586 2f897aa8","cid": 2,"coo": "CA", "latitude": 6206219.1186,"longitude": -8375080.2814,"type": 1,"connected": "2017-01-31 02:22:44","parent": "0" },"SG1":{"_uuid": "58b1c4234 242586 2f897aa8","cid": 3,"coo": "CA", "latitude": 5206219.1186,"longitude": -7375080.2814,"type": 2,"connected": "2017-01-31 12:26:41","parent": "2" }}';
 
+
 var serverQ = {
-    requestServerData: function() {
+    requestServerData: function () {
         // Replace with server ajax call
         return (JSON.parse(fakeJson));
     },
 
-    /*
-    * This function parses the JSON built object to be features in the web map.
-    */
-    returnFeatures: function(){
-        var jsonData = this.requestServerData();
+    populateServerArray: function (serverData) {
+        var i = 0;
 
-        if (jsonData == null) {
-            return [];
+        for (index in serverData) {
+            var serverObj = serverObject;
+            app.arrayOfServerObjects.push(serverObj)
+            i++;
         }
 
-        var featureList = {
-            'type': 'FeatureCollection',
-            'crs': {
-            'type': 'name',
-            'properties': {
-                'name': 'EPSG:3857'
-            }
-            },'features': []
-        };
-      
-    for (var item in jsonData) {
-        featureList['features'].push({
-        'type': 'Feature',
-        'geometry': {
-            'type': 'Point',
-            'coordinates': [
-                jsonData[item].longitude,
-                jsonData[item].latitude]
-            },
-            // These props will later be drawn from a centralized json
-            'properties': {
-                'name': jsonData[item].cid,
-                'type': jsonData[item].type
-            }
-        });
-    }
-
-    return featureList;       
+        console.log(i);
     },
 
-    generateTable: function(jsonData) {
+    /*
+    * This function uses the server array to generate features in the web map.
+    */
+    returnFeatures: function () {
+        this.populateServerArray(this.requestServerData());
+
+        var featureList = new ol.Collection() 
+
+        if (app.arrayOfServerObjects == null) {
+            return featureList;
+        }
+
+        for (var index in app.arrayOfServerObjects) {
+            featureList.push(
+                app.arrayOfServerObjects[index].getFeature()
+            );
+        }
+
+        return featureList;
+    },
+
+    generateTable: function (jsonData) {
         // For each item we find. Build a row.
-        if (jsonData == null){
+        if (jsonData == null) {
             return '<tr><td colspan="4">No servers detected</td></tr>'
         }
 
         var returnTable = ''
-        
+
         for (var sEl in jsonData) {
             returnTable += this.generateRow(
                 jsonData[sEl].cid,
@@ -69,11 +63,11 @@ var serverQ = {
                 jsonData[sEl].coo,
                 jsonData[sEl].connected);
         };
-        
+
         return returnTable;
     },
 
-    generateRow: function(id, name, countryOfOrgin, connectionDuration) {
+    generateRow: function (id, name, countryOfOrgin, connectionDuration) {
         var rowHtml = '<tr><td>' + id + '</td><td>' + name + '</td><td>' + countryOfOrgin + '</td><td>' + connectionDuration + '</td></tr>'
         return rowHtml;
     }

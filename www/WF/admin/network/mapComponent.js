@@ -135,7 +135,7 @@ raster.on('afteroperations', function (event) {
 });
 
 var vector2 = new ol.source.Vector({
-  features: (new ol.format.GeoJSON()).readFeatures(serverQ.returnFeatures())
+  features: serverQ.returnFeatures()
 });
 
 var map = new ol.Map({
@@ -192,7 +192,7 @@ map.addInteraction(select);
 
 select.on('select', function(evt) {
     
-  /* Reeminder:
+  /* Reminder:
    * We need to stop the popup from moving
    * around when you select away from the feature. 
    * As each select/deselect will run this select function.
