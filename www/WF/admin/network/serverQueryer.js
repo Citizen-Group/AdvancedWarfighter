@@ -19,7 +19,13 @@ var serverQ = {
         var i = 0;
 
         for (index in serverData) {
-            var serverObj = serverObject;
+            var serverObj = new serverObject;
+
+            serverObj.cid = serverData[index].cid;
+            serverObj.type = serverData[index].type;
+            serverObj.latitude = serverData[index].latitude;
+            serverObj.longitude = serverData[index].longitude;
+
             app.arrayOfServerObjects.push(serverObj)
             i++;
         }
